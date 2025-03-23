@@ -1,0 +1,69 @@
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV FLUTTER_VERSION=3.16.0
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    unzip \
+    xz-utils \
+    zip \
+    libglu1-mesa \
+    openjdk-11-jdk \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and setup Android SDK
+ENV ANDROID_HOME=/opt/android-sdk
+RUN mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} \
+    && wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip \
+    && unzip commandlinetools-linux-*_latest.zip \
+    && rm commandlinetools-linux-*_latest.zip \
+    && mkdir -p ${ANDROID_HOME}/cmdline-tools/latest \
+    && mv ${ANDROID_HOME}/cmdline-tools/* ${ANDROID_HOME}/cmdline-tools/latest/ \
+    || if [ $? -ne 0 ]; then echo "Failed to move files"; fi
+
+# Set Android SDK environment variables
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
+
+# Accept Android SDK licenses
+RUN yes | sdkmanager --licenses
+
+# Install Android SDK components
+RUN sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+
+# Download Flutter SDK
+RUN git clone https://github.com/flutter/flutter.git -b stable /flutter
+
+# Add flutter to PATH
+ENV PATH=${PATH}:/flutter/bin
+
+# Pre-download Flutter artifacts
+RUN flutter precache
+
+# Accept Flutter licenses
+RUN flutter doctor --android-licenses
+
+# Install Flutter dependencies
+RUN flutter doctor
+
+# Set the working directory
+WORKDIR /app
+
+# Copy pubspec files
+COPY pubspec.* ./
+
+# Get Flutter packages
+RUN flutter pub get
+
+# Copy the rest of the application
+COPY . .
+
+# Expose ports for Flutter development server and debugging
+EXPOSE 8888 42000
+
+# Start Flutter development server with hot reload
+CMD ["flutter", "run", "--host=0.0.0.0", "--port=8888", "--debug-port=42000", "--web-hostname=0.0.0.0", "--web-port=8888"]
