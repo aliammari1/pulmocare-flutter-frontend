@@ -35,7 +35,7 @@ class _PatientsViewState extends State<PatientsView> {
           await dio.get('${Config.apiBaseUrl}/patient/list');
       if (response.statusCode == 200) {
         setState(() {
-          _patients = json.decode(response.data);
+          _patients = response.data;
           _isLoading = false;
         });
       } else {
