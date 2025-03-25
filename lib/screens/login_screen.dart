@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:medapp/utils/DioClient.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:medapp/config.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -11,6 +13,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final Dio dio = DioHttpClient().dio;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -23,17 +26,17 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await http.post(
-        Uri.parse('$_apiUrl/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
+      final response = await dio.post(
+        '$_apiUrl/login',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+        data: {
           'email': _emailController.text,
           'password': _passwordController.text,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', data['token']);
         if (mounted) {

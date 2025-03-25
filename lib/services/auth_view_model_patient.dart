@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medapp/config.dart';
+import 'package:medapp/utils/DioClient.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +13,7 @@ class PatientAuthViewModel extends ChangeNotifier {
   String _userId = '';
   String _userEmail = '';
   String _userName = '';
-
+  final Dio dio = DioHttpClient().dio; // Dio instance for API requests
   // Base URL for API requests
   final String _baseUrl = Config.apiBaseUrl;
 
@@ -46,10 +47,10 @@ class PatientAuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/patient/signup'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await dio.post(
+        '$_baseUrl/patient/signup',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+        data: jsonEncode({
           'name': name,
           'email': email,
           'password': password,
@@ -61,7 +62,7 @@ class PatientAuthViewModel extends ChangeNotifier {
         // Auto login after signup
         await login(email, password, false);
       } else {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         _errorMessage = responseData['error'] ?? 'Signup failed';
       }
     } catch (e) {
@@ -83,17 +84,17 @@ class PatientAuthViewModel extends ChangeNotifier {
       // Use the appropriate endpoint based on user type
       final endpoint = /*isDoctor ? '/doctor/login' :*/ '/patient/login';
 
-      final response = await http.post(
-        Uri.parse('$_baseUrl$endpoint'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await dio.post(
+        '$_baseUrl$endpoint',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+        data: jsonEncode({
           'email': email,
           'password': password,
         }),
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         _token = responseData['token'];
         _userId = responseData['id'];
         _userEmail = responseData['email'];
@@ -107,7 +108,7 @@ class PatientAuthViewModel extends ChangeNotifier {
         prefs.setString('userEmail', _userEmail);
         prefs.setString('userName', _userName);
       } else {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         _errorMessage = responseData['error'] ?? 'Authentication failed';
       }
     } catch (e) {
@@ -125,13 +126,13 @@ class PatientAuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/patient/login/face'),
-        headers: {'Content-Type': 'application/json'},
+      final response = await dio.post(
+        '$_baseUrl/patient/login/face',
+        options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         _token = responseData['token'];
         _userId = responseData['id'];
         _userEmail = responseData['email'];
@@ -145,7 +146,7 @@ class PatientAuthViewModel extends ChangeNotifier {
         prefs.setString('userEmail', _userEmail);
         prefs.setString('userName', _userName);
       } else {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         _errorMessage = responseData['error'] ?? 'Face authentication failed';
       }
     } catch (e) {
@@ -183,16 +184,16 @@ class PatientAuthViewModel extends ChangeNotifier {
       // Choose the appropriate endpoint based on user type
       final endpoint = '/patient/forgot-password'; // Default to patient
 
-      final response = await http.post(
-        Uri.parse('$_baseUrl$endpoint'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
+      final response = await dio.post(
+        '$_baseUrl$endpoint',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+        data: jsonEncode({'email': email}),
       );
 
       if (response.statusCode == 200) {
         return true;
       } else {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         _errorMessage = responseData['error'] ?? 'Failed to send reset code';
         return false;
       }
@@ -212,10 +213,10 @@ class PatientAuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/patient/verify-otp'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await dio.post(
+        '$_baseUrl/patient/verify-otp',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+        data: jsonEncode({
           'email': email,
           'otp': otp,
         }),
@@ -224,7 +225,7 @@ class PatientAuthViewModel extends ChangeNotifier {
       if (response.statusCode == 200) {
         return true;
       } else {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         _errorMessage = responseData['error'] ?? 'Invalid OTP';
         return false;
       }
@@ -245,10 +246,10 @@ class PatientAuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/patient/reset-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await dio.post(
+        '$_baseUrl/patient/reset-password',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+        data: jsonEncode({
           'email': email,
           'otp': otp,
           'newPassword': newPassword,
@@ -258,7 +259,7 @@ class PatientAuthViewModel extends ChangeNotifier {
       if (response.statusCode == 200) {
         return true;
       } else {
-        final responseData = jsonDecode(response.body);
+        final responseData = jsonDecode(response.data);
         _errorMessage = responseData['error'] ?? 'Failed to reset password';
         return false;
       }

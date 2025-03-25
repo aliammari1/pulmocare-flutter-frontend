@@ -1,8 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:medapp/config.dart';
+import 'package:medapp/utils/DioClient.dart';
 import '../theme/app_theme.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class PatientsView extends StatefulWidget {
   const PatientsView({super.key});
@@ -15,6 +16,7 @@ class _PatientsViewState extends State<PatientsView> {
   List<dynamic> _patients = [];
   bool _isLoading = true;
   String? _error;
+  final Dio dio = DioHttpClient().dio;
 
   @override
   void initState() {
@@ -30,15 +32,15 @@ class _PatientsViewState extends State<PatientsView> {
       });
 
       final response =
-          await http.get(Uri.parse('${Config.apiBaseUrl}/patient/list'));
+          await dio.get('${Config.apiBaseUrl}/patient/list');
       if (response.statusCode == 200) {
         setState(() {
-          _patients = json.decode(response.body);
+          _patients = json.decode(response.data);
           _isLoading = false;
         });
       } else {
         setState(() {
-          _error = 'Failed to load patients';
+          _error = 'Failed to load patients: ${response.statusCode}';
           _isLoading = false;
         });
       }

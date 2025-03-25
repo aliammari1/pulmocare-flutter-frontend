@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medapp/config.dart';
+import 'package:medapp/utils/DioClient.dart';
 
 //class ScrapedDoctorScreen extends StatefulWidget {
 
@@ -41,11 +41,12 @@ class ScrapedDoctorScreen extends StatefulWidget {
 class _ScrapedDoctorScreenState extends State<ScrapedDoctorScreen> {
   late Future<List<Doctor>> futureDoctors;
   final _apiUrl = Config.apiBaseUrl;
+  final Dio dio = DioHttpClient().dio;
   Future<List<Doctor>> fetchDoctors() async {
-    final response = await http.get(Uri.parse('$_apiUrl/scrape_doctors'));
+    final response = await dio.get('$_apiUrl/scrape_doctors');
 
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
+      List jsonResponse = response.data;
       return jsonResponse.map((doctor) => Doctor.fromJson(doctor)).toList();
     } else {
       throw Exception('Erreur lors du chargement des médecins');

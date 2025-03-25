@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'dart:async';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:medapp/config.dart';
+import 'package:medapp/utils/DioClient.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import '../models/medicament.dart';
@@ -15,7 +16,7 @@ class ApiService {
   // Mise à jour de la clé API FDA
   static const String apiKey = '4DpshbRmBvQ4k0hg27yZT2zEEFvYVHbqa8WHlhan';
   static const String _apiUrl = Config.apiBaseUrl;
-
+  final Dio dio = DioHttpClient().dio;
   Future<List<Medicament>> searchMedicaments(String query) async {
     try {
       print("Searching medications with query: $query");
@@ -24,15 +25,15 @@ class ApiService {
       final searchQuery =
           'openfda.brand_name:"$query" OR openfda.strength:"$query"';
 
-      final response = await http.get(
-        Uri.parse('$openFdaBaseUrl/label.json'
-            '?api_key=$apiKey'
-            '&search=$searchQuery'
-            '&limit=20'),
+      final response = await dio.get(
+        '$openFdaBaseUrl/label.json'
+        '?api_key=$apiKey'
+        '&search=$searchQuery'
+        '&limit=20',
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         if (data['results'] != null) {
           final results = data['results'] as List;
           return results.map((item) {
@@ -118,32 +119,34 @@ class ApiService {
   Future<Map<String, dynamic>> createOrdonnance(Ordonnance ordonnance) async {
     try {
       print('\n=== ENVOI DE LA REQUÊTE ===');
-      final url = Uri.parse('$_apiUrl/ordonnances');
+      final url = '$_apiUrl/ordonnances';
       final body = jsonEncode(ordonnance.toJson());
 
       print('URL: $url');
       print('Body: $body');
 
-      final response = await http
+      final response = await dio
           .post(
             url,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: body,
+            options: Options(
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+            ),
+            data: body,
           )
           .timeout(const Duration(seconds: 30));
 
       print('\n=== RÉPONSE DU SERVEUR ===');
       print('Status: ${response.statusCode}');
-      print('Body: ${response.body}');
+      print('Body: ${response.data}');
 
       if (response.statusCode == 201) {
-        return json.decode(response.body);
+        return json.decode(response.data);
       }
 
-      throw Exception('Erreur HTTP ${response.statusCode}: ${response.body}');
+      throw Exception('Erreur HTTP ${response.statusCode}: ${response.data}');
     } catch (e) {
       print('\n=== ERREUR DE CRÉATION ===');
       print('Type: ${e.runtimeType}');
@@ -153,12 +156,12 @@ class ApiService {
   }
 
   Future<List<Ordonnance>> getDoctorOrdonnances(String medecinId) async {
-    final response = await http.get(
-      Uri.parse('$_apiUrl/ordonnances/doctor/$medecinId'),
+    final response = await dio.get(
+      '$_apiUrl/ordonnances/doctor/$medecinId',
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final List<dynamic> data = json.decode(response.data);
       return data.map((json) => Ordonnance.fromJson(json)).toList();
     }
     throw Exception('Erreur lors de la récupération des ordonnances');
@@ -167,54 +170,47 @@ class ApiService {
   Future<String> savePdf(
       String medecinId, String ordonnanceId, Uint8List pdfBytes) async {
     try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$_apiUrl/pdfs/save'),
-      );
-
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'pdf',
+      FormData formData = FormData.fromMap({
+        'pdf': MultipartFile.fromBytes(
           pdfBytes,
-          contentType: MediaType('application', 'pdf'),
           filename: 'ordonnance.pdf',
+          contentType: MediaType('application', 'pdf'),
         ),
+        'medecin_id': medecinId,
+        'ordonnance_id': ordonnanceId,
+      });
+
+      final response = await dio.post(
+        '$_apiUrl/pdfs/save',
+        data: formData,
       );
-
-      request.fields['medecin_id'] = medecinId;
-      request.fields['ordonnance_id'] = ordonnanceId;
-
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
-      final jsonData = json.decode(responseData);
 
       if (response.statusCode == 201) {
-        return jsonData['filename'];
+        return response.data['filename'];
       }
-      throw Exception(jsonData['error']);
+      throw Exception(response.data['error']);
     } catch (e) {
       throw Exception('Erreur lors de la sauvegarde du PDF: $e');
     }
   }
 
   Future<List<Map<String, dynamic>>> getMedecinPdfs(String medecinId) async {
-    final response = await http.get(
-      Uri.parse('$_apiUrl/pdfs/medecin/$medecinId'),
-    );
+    final response = await dio.get('$_apiUrl/pdfs/medecin/$medecinId');
 
     if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(json.decode(response.body));
+      return List<Map<String, dynamic>>.from(response.data);
     }
     throw Exception('Erreur lors de la récupération des PDFs');
   }
 
   Future<Uint8List> downloadPdf(String filename) async {
-    final response = await http.get(
-      Uri.parse('$_apiUrl/pdfs/download/$filename'),
+    final response = await dio.get(
+      '$_apiUrl/pdfs/download/$filename',
+      options: Options(responseType: ResponseType.bytes),
     );
 
     if (response.statusCode == 200) {
-      return response.bodyBytes;
+      return Uint8List.fromList(response.data);
     }
     throw Exception('Erreur lors du téléchargement du PDF');
   }
@@ -223,19 +219,21 @@ class ApiService {
       String medecinId) async {
     try {
       print("Fetching ordonnances for medecin: $medecinId");
-      final response = await http.get(
-        Uri.parse('$_apiUrl/ordonnances/medecin/$medecinId/ordonnances'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+      final response = await dio.get(
+        '$_apiUrl/ordonnances/medecin/$medecinId/ordonnances',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
       );
 
       print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}");
+      print("Response data: ${response.data}");
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final List<dynamic> data = response.data;
         return List<Map<String, dynamic>>.from(data);
       } else {
         throw Exception('Erreur HTTP: ${response.statusCode}');
@@ -249,28 +247,23 @@ class ApiService {
   Future<String> saveOrdonnancePdf(
       String ordonnanceId, Uint8List pdfBytes) async {
     try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$_apiUrl/ordonnances/$ordonnanceId/pdf'),
-      );
-
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'pdf',
+      FormData formData = FormData.fromMap({
+        'pdf': MultipartFile.fromBytes(
           pdfBytes,
-          contentType: MediaType('application', 'pdf'),
           filename: 'ordonnance.pdf',
+          contentType: MediaType('application', 'pdf'),
         ),
-      );
+      });
 
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
-      final jsonData = json.decode(responseData);
+      final response = await dio.post(
+        '$_apiUrl/ordonnances/$ordonnanceId/pdf',
+        data: formData,
+      );
 
       if (response.statusCode == 201) {
-        return jsonData['filename'];
+        return response.data['filename'];
       }
-      throw Exception(jsonData['error']);
+      throw Exception(response.data['error']);
     } catch (e) {
       throw Exception('Erreur lors de la sauvegarde du PDF: $e');
     }
@@ -278,16 +271,19 @@ class ApiService {
 
   Future<Uint8List?> getOrdonnancePdf(String ordonnanceId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_apiUrl/ordonnances/$ordonnanceId/pdf'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+      final response = await dio.get(
+        '$_apiUrl/ordonnances/$ordonnanceId/pdf',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          responseType: ResponseType.bytes,
+        ),
       );
 
       if (response.statusCode == 200) {
-        return response.bodyBytes;
+        return Uint8List.fromList(response.data);
       }
       print("Failed to get PDF: ${response.statusCode}");
       return null;
@@ -301,12 +297,10 @@ class ApiService {
       String ordonnanceId) async {
     try {
       print("Fetching ordonnance: $ordonnanceId");
-      final response = await http.get(
-        Uri.parse('$_apiUrl/ordonnances/$ordonnanceId'),
-      );
+      final response = await dio.get('$_apiUrl/ordonnances/$ordonnanceId');
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        return response.data;
       }
       return null;
     } catch (e) {
@@ -318,14 +312,17 @@ class ApiService {
   Future<Uint8List?> generatePdfFromData(
       Map<String, dynamic> ordonnance) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_apiUrl/generate-pdf'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(ordonnance),
+      final response = await dio.post(
+        '$_apiUrl/generate-pdf',
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          responseType: ResponseType.bytes,
+        ),
+        data: ordonnance,
       );
 
       if (response.statusCode == 200) {
-        return response.bodyBytes;
+        return Uint8List.fromList(response.data);
       }
       return null;
     } catch (e) {
@@ -337,15 +334,13 @@ class ApiService {
   Future<Map<String, dynamic>?> getSingleOrdonnance(String ordonnanceId) async {
     try {
       print("Fetching ordonnance: $ordonnanceId");
-      final response = await http.get(
-        Uri.parse('$_apiUrl/ordonnances/$ordonnanceId'),
-      );
+      final response = await dio.get('$_apiUrl/ordonnances/$ordonnanceId');
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        return response.data;
       }
       print(
-          'Failed to get ordonnance: ${response.statusCode} - ${response.body}');
+          'Failed to get ordonnance: ${response.statusCode} - ${response.data}');
       return null;
     } catch (e) {
       print('Error getting ordonnance: $e');
@@ -360,12 +355,10 @@ class ApiService {
 
   Future<Map<String, String>> getPatientEmail(String patientId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_apiUrl/patients/$patientId/email'),
-      );
+      final response = await dio.get('$_apiUrl/patients/$patientId/email');
 
       if (response.statusCode == 200) {
-        return Map<String, String>.from(json.decode(response.body));
+        return Map<String, String>.from(response.data);
       }
       return {};
     } catch (e) {

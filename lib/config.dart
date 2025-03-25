@@ -1,6 +1,6 @@
 class Config {
   // Updated to use Kong API Gateway
-  static const String apiBaseUrl = 'http://192.168.248.105:8000/api';
+  static const String apiBaseUrl = 'http://10.0.2.2:8000/api';
 
   // For Flutter web or emulator use
   static const String localApiBaseUrl = 'http://localhost:8000/api';

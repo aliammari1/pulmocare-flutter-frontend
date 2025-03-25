@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:html/parser.dart' as parser;
+import 'package:medapp/utils/DioClient.dart';
 import '../models/news_item.dart';
 
 class NewsViewModel extends ChangeNotifier {
@@ -23,6 +24,8 @@ class NewsViewModel extends ChangeNotifier {
   List<NewsItem> get news => _news;
   bool get isLoading => _isLoading;
 
+  final Dio dio = DioHttpClient().dio;
+
   Future<void> fetchNews() async {
     _isLoading = true;
     notifyListeners();
@@ -32,16 +35,17 @@ class NewsViewModel extends ChangeNotifier {
       final specialty = _selectedSpecialty.toLowerCase().replaceAll('é', 'e');
       final url = 'https://www.univadis.fr/news/$specialty';
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        },
+      final response = await dio.get(url,
+        options: Options(
+          headers: {
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          },
+        ),
       );
 
       if (response.statusCode == 200) {
-        final document = parser.parse(response.body);
+        final document = parser.parse(response.data);
         // Updated selectors to match website structure
         final articles = document.querySelectorAll('.news-card, .article-card');
 

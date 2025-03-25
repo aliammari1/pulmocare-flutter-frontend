@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'dart:convert';
 
 import 'package:medapp/config.dart';
+import 'package:medapp/utils/DioClient.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,14 +19,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   String selectedRole = 'Patient';
+  final Dio dio = DioHttpClient().dio;
   final String _apiUrl = Config.apiBaseUrl;
 
   Future<void> register() async {
     if (_formKey.currentState!.validate()) {
-      final response = await http.post(
-        Uri.parse('$_apiUrl/patient/signup'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
+      final response = await dio.post(
+        '$_apiUrl/patient/signup',
+        options: Options(headers: {"Content-Type": "application/json"}),
+        data: jsonEncode({
           "email": emailController.text,
           "password": passwordController.text,
           "name": nameController.text,
@@ -33,7 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           "role": selectedRole
         }),
       );
-      final data = jsonDecode(response.body);
+      final data = response.data;
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Registration successful!")),

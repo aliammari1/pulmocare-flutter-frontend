@@ -160,6 +160,7 @@ class _LoginViewState extends State<LoginView> {
                           TextFormField(
                             controller: _emailController,
                             validator: _validateEmail,
+                            keyboardType: TextInputType.emailAddress,
                             decoration: AppTheme.inputDecoration.copyWith(
                               labelText: 'Email',
                               prefixIcon:

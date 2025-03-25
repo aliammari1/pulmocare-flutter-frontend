@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medapp/config.dart';
+import 'package:medapp/utils/DioClient.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,18 +17,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<Map<String, dynamic>> appointments = [];
   bool isLoading = true;
   final String _apiUrl = Config.apiBaseUrl;
-
+  final Dio dio = DioHttpClient().dio;
   Future<void> fetchProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
 
-    final response = await http.get(
-      Uri.parse('$_apiUrl/profile'),
-      headers: {"Authorization": "Bearer $token"},
+    final response = await dio.get(
+      '$_apiUrl/profile',
+      options: Options(headers: {"Authorization": "Bearer $token"}),
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = jsonDecode(response.data);
       setState(() {
         userData = data["user"];
         appointments = List<Map<String, dynamic>>.from(data["appointments"]);

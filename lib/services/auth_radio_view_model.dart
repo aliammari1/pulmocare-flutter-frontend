@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:medapp/config.dart';
+import 'package:medapp/utils/DioClient.dart';
 import '../models/doctor.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
@@ -11,26 +12,31 @@ class AuthRadioViewModel extends ChangeNotifier {
   bool isAuthenticated = false;
   String errorMessage = '';
   String? authToken;
-
+  final Dio dio = DioHttpClient().dio;
   static const String baseUrl = Config.apiBaseUrl;
   Future<void> login(String email, String password) async {
     try {
       print('Attempting login with: $email'); // Add debug log
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/login'), // Use baseUrl instead of ApiConfig
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
+      final response = await dio.post(
+        '$baseUrl/login', // Use baseUrl instead of ApiConfig
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+        data: json.encode({
           'email': email,
           'password': password,
         }),
       );
 
       print('Response status: ${response.statusCode}'); // Add debug log
-      print('Response body: ${response.body}'); // Add debug log
+      print('Response body: ${response.data}'); // Add debug log
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         authToken = data['token'];
         currentDoctor = Doctor(
           id: data['id'],
@@ -46,7 +52,7 @@ class AuthRadioViewModel extends ChangeNotifier {
         isAuthenticated = true;
         errorMessage = '';
       } else {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         errorMessage = data['error'] ?? 'Login failed';
         isAuthenticated = false;
       }
@@ -61,11 +67,14 @@ class AuthRadioViewModel extends ChangeNotifier {
   Future<void> signup(String name, String email, String password,
       String specialty, String phoneNumber, String address) async {
     try {
-      final response = await http
+      final response = await dio
           .post(
-        Uri.parse('$baseUrl/signup'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
+        '$baseUrl/signup',
+        options: Options(headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }),
+        data: json.encode({
           'name': name,
           'email': email,
           'password': password,
@@ -84,7 +93,7 @@ class AuthRadioViewModel extends ChangeNotifier {
       if (response.statusCode == 201) {
         await login(email, password);
       } else {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         errorMessage = data['error'] ?? 'Signup failed';
         isAuthenticated = false;
       }
@@ -104,13 +113,16 @@ class AuthRadioViewModel extends ChangeNotifier {
   Future<void> forgotPassword(String email) async {
     errorMessage = '';
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/forgot-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email}),
+      final response = await dio.post(
+        '$baseUrl/forgot-password',
+        options: Options(headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }),
+        data: json.encode({'email': email}),
       );
       if (response.statusCode != 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         errorMessage = data['error'] ?? 'Failed to send OTP';
       }
     } catch (e) {
@@ -123,16 +135,16 @@ class AuthRadioViewModel extends ChangeNotifier {
   Future<bool> verifyOTP(String email, String otp) async {
     errorMessage = '';
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/verify-otp'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email, 'otp': otp}),
+      final response = await dio.post(
+        '$baseUrl/verify-otp',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+        data: json.encode({'email': email, 'otp': otp}),
       );
 
       if (response.statusCode == 200) {
         return true;
       } else {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         errorMessage = data['error'] ?? 'Invalid OTP';
         return false;
       }
@@ -149,10 +161,10 @@ class AuthRadioViewModel extends ChangeNotifier {
       String email, String otp, String newPassword) async {
     errorMessage = '';
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/reset-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
+      final response = await dio.post(
+        '$baseUrl/reset-password',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+        data: json.encode({
           'email': email,
           'otp': otp,
           'newPassword': newPassword,
@@ -162,7 +174,7 @@ class AuthRadioViewModel extends ChangeNotifier {
       if (response.statusCode == 200) {
         return true;
       } else {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         errorMessage = data['error'] ?? 'Failed to reset password';
         return false;
       }
@@ -179,16 +191,18 @@ class AuthRadioViewModel extends ChangeNotifier {
     if (authToken == null) return;
 
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/profile'),
-        headers: {
-          'Authorization': 'Bearer $authToken',
-          'Content-Type': 'application/json',
-        },
+      final response = await dio.get(
+        '$baseUrl/profile',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $authToken',
+            'Content-Type': 'application/json',
+          },
+        ),
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         currentDoctor = Doctor(
           id: data['id'],
           name: data['name'],
@@ -211,20 +225,22 @@ class AuthRadioViewModel extends ChangeNotifier {
   Future<void> changePassword(
       String currentPassword, String newPassword) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/change-password'),
-        headers: {
-          'Authorization': 'Bearer $authToken',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
+      final response = await dio.post(
+        '$baseUrl/change-password',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $authToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: json.encode({
           'current_password': currentPassword,
           'new_password': newPassword,
         }),
       );
 
       if (response.statusCode != 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         errorMessage = data['error'] ?? 'Failed to change password';
       } else {
         errorMessage = '';
@@ -243,13 +259,15 @@ class AuthRadioViewModel extends ChangeNotifier {
     String? base64Image,
   }) async {
     try {
-      final response = await http.put(
-        Uri.parse('$baseUrl/update-profile'),
-        headers: {
-          'Authorization': 'Bearer $authToken',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
+      final response = await dio.put(
+        '$baseUrl/update-profile',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $authToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: json.encode({
           'name': name,
           'specialty': specialty,
           'phone_number': phoneNumber,
@@ -259,7 +277,7 @@ class AuthRadioViewModel extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         currentDoctor = Doctor(
           id: data['id'],
           name: data['name'],
@@ -276,7 +294,7 @@ class AuthRadioViewModel extends ChangeNotifier {
         );
         errorMessage = '';
       } else {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         errorMessage = data['error'] ?? 'Failed to update profile';
       }
     } catch (e) {
@@ -288,12 +306,12 @@ class AuthRadioViewModel extends ChangeNotifier {
   Future<void> logout() async {
     if (authToken == null) return;
     try {
-      await http.post(
-        Uri.parse('$baseUrl/logout'),
-        headers: {
+      await dio.post(
+        '$baseUrl/logout',
+        options: Options(headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
-        },
+        }),
       );
       authToken = null;
       currentDoctor = null;
@@ -308,19 +326,19 @@ class AuthRadioViewModel extends ChangeNotifier {
 
   Future<void> verifyDoctor(String base64Image) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/verify-doctor'),
-        headers: {
+      final response = await dio.post(
+        '$baseUrl/verify-doctor',
+        options: Options(headers: {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
-        },
-        body: json.encode({
+        }),
+        data: json.encode({
           'image': base64Image,
         }),
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         if (currentDoctor != null) {
           currentDoctor = Doctor(
             id: currentDoctor!.id,
@@ -335,7 +353,7 @@ class AuthRadioViewModel extends ChangeNotifier {
         }
         errorMessage = '';
       } else {
-        final data = json.decode(response.body);
+        final data = json.decode(response.data);
         errorMessage = data['error'] ?? 'Verification failed';
       }
     } catch (e) {

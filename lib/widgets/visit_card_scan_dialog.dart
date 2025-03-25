@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'dart:convert';
 
 import 'package:medapp/config.dart';
+import 'package:medapp/utils/DioClient.dart';
 
 class VisitCardScanDialog extends StatefulWidget {
   const VisitCardScanDialog({super.key});
@@ -19,6 +20,7 @@ class _VisitCardScanDialogState extends State<VisitCardScanDialog> {
   String _errorMessage = '';
   final _picker = ImagePicker();
   final String _apiUrl = Config.apiBaseUrl;
+  final Dio dio = DioHttpClient().dio;
   Future<void> _getImage(ImageSource source) async {
     try {
       final pickedFile = await _picker.pickImage(source: source);
@@ -41,14 +43,15 @@ class _VisitCardScanDialogState extends State<VisitCardScanDialog> {
 
     try {
       String base64Image = base64Encode(_image!.readAsBytesSync());
-      var response = await http.post(
-        Uri.parse('$_apiUrl/scan-visit-card'),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({'image': base64Image}),
+      var response = await dio.post(
+        '$_apiUrl/scan-visit-card',
+
+        options: Options(headers: {"Content-Type": "application/json"}),
+        data: json.encode({'image': base64Image}),
       );
 
       if (response.statusCode == 200) {
-        var data = json.decode(response.body);
+        var data = response.data;
         Navigator.pop(context, data); // Return the extracted data
       } else {
         setState(() => _errorMessage = 'Failed to process image');
