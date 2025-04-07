@@ -17,7 +17,7 @@ class VerificationAlert extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.green.withOpacity(0.1),
+          color: Colors.green.withAlpha((0.1 * 255).toInt()),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Colors.green,
@@ -50,7 +50,7 @@ class VerificationAlert extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.1),
+        color: Colors.orange.withAlpha((0.1 * 255).toInt()),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.orange,

@@ -70,7 +70,7 @@ class _OrdonnanceScreenState extends State<OrdonnanceScreen> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withAlpha((0.1 * 255).toInt()),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -125,7 +125,7 @@ class _OrdonnanceScreenState extends State<OrdonnanceScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withAlpha((0.1 * 255).toInt()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -220,7 +220,7 @@ class _OrdonnanceScreenState extends State<OrdonnanceScreen> {
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withAlpha((0.2 * 255).toInt()),
                     spreadRadius: 2,
                     blurRadius: 8,
                     offset: const Offset(0, 2),

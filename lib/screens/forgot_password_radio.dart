@@ -107,7 +107,7 @@ class _ForgotPasswordRadioViewState extends State<ForgotPasswordRadioView> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD8EFF5).withOpacity(0.3),
+                        color: const Color(0xFFD8EFF5).withAlpha((0.3 * 255).toInt()),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -333,7 +333,7 @@ class _ForgotPasswordRadioViewState extends State<ForgotPasswordRadioView> {
                                 margin: const EdgeInsets.only(top: 16),
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.1),
+                                  color: Colors.red.withAlpha((0.1 * 255).toInt()),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(

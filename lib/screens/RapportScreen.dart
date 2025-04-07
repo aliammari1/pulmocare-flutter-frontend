@@ -128,7 +128,7 @@ CONCLUSION URGENTE :
   }) {
     return Card(
       elevation: 2,
-      shadowColor: AppTheme.primaryColor.withOpacity(0.3),
+      shadowColor: AppTheme.primaryColor.withAlpha((0.3 * 255).toInt()),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
@@ -368,7 +368,7 @@ CONCLUSION URGENTE :
                     ),
                     minimumSize: Size(double.infinity, 54),
                     elevation: 3,
-                    shadowColor: AppTheme.primaryColor.withOpacity(0.5),
+                    shadowColor: AppTheme.primaryColor.withAlpha((0.5 * 255).toInt()),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

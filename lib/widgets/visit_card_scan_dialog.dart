@@ -45,7 +45,6 @@ class _VisitCardScanDialogState extends State<VisitCardScanDialog> {
       String base64Image = base64Encode(_image!.readAsBytesSync());
       var response = await dio.post(
         '$_apiUrl/scan-visit-card',
-
         options: Options(headers: {"Content-Type": "application/json"}),
         data: json.encode({'image': base64Image}),
       );
@@ -128,7 +127,7 @@ class _VisitCardScanDialogState extends State<VisitCardScanDialog> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: Color(0xFF35C5CF).withOpacity(0.1),
+          color: Color(0xFF35C5CF).withAlpha((0.1 * 255).toInt()),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(

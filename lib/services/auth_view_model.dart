@@ -27,9 +27,6 @@ class AuthViewModel extends ChangeNotifier {
         }),
       );
 
-      print('Response status: ${response.statusCode}'); // Add debug log
-      print('Response body: ${response.data}'); // Add debug log
-
       if (response.statusCode == 200) {
         final data = response.data;
         authToken = data['token'];

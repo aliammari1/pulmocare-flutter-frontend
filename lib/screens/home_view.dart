@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:medapp/theme/app_theme.dart';
 import 'package:medapp/screens/profile_view.dart';
 import 'package:provider/provider.dart';
@@ -16,9 +17,9 @@ class HomeView extends StatefulWidget {
   _HomeViewState createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
-
+  late AnimationController _fabAnimationController;
   final List<Widget> _pages = [
     const NewsView(),
     PatientsView(),
@@ -30,13 +31,33 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
+    // Initialize animation controller for the FAB
+    _fabAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    
     // Fetch profile data when home view is loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthViewModel>().fetchProfile();
     });
   }
+  
+  @override
+  void dispose() {
+    _fabAnimationController.dispose();
+    super.dispose();
+  }
 
   void _openAIAssistant() {
+    // Provide haptic feedback
+    HapticFeedback.mediumImpact();
+    
+    // Animate the button press
+    _fabAnimationController.forward().then((_) {
+      _fabAnimationController.reverse();
+    });
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -73,8 +94,11 @@ class _HomeViewState extends State<HomeView> {
                   Icons.menu_rounded,
                   size: 30,
                 ),
-                onPressed: () => Scaffold.of(context)
-                    .openEndDrawer(), // Changed from openDrawer to openEndDrawer
+                onPressed: () {
+                  // Add haptic feedback for menu button
+                  HapticFeedback.lightImpact();
+                  Scaffold.of(context).openEndDrawer();
+                },
                 tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
               );
             },
@@ -97,7 +121,7 @@ class _HomeViewState extends State<HomeView> {
           color: Colors.white,
           border: Border(
             top: BorderSide(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withAlpha((0.2 * 255).toInt()),
               width: 1,
             ),
           ),
@@ -117,6 +141,8 @@ class _HomeViewState extends State<HomeView> {
             unselectedFontSize: 12,
             iconSize: 24,
             onTap: (index) {
+              // Add haptic feedback when changing tabs
+              HapticFeedback.selectionClick();
               setState(() {
                 _currentIndex = index;
               });
@@ -141,16 +167,37 @@ class _HomeViewState extends State<HomeView> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openAIAssistant,
-        backgroundColor: AppTheme.turquoise,
-        child: const Icon(Icons.medical_services_outlined),
+      floatingActionButton: AnimatedBuilder(
+        animation: _fabAnimationController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: 1.0 - (_fabAnimationController.value * 0.1),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.turquoise.withOpacity(0.4),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: FloatingActionButton(
+                onPressed: _openAIAssistant,
+                backgroundColor: AppTheme.turquoise,
+                elevation: 4,
+                child: const Icon(
+                  Icons.medical_services_outlined, 
+                  size: 28,
+                ),
+              ),
+            ),
+          );
+        },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
-}
-
-extension on Function() {
-  read() {}
 }

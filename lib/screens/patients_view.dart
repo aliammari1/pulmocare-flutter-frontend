@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:medapp/config.dart';
 import 'package:medapp/utils/DioClient.dart';
 import '../theme/app_theme.dart';
-import 'dart:convert';
 
 class PatientsView extends StatefulWidget {
   const PatientsView({super.key});
@@ -31,8 +30,7 @@ class _PatientsViewState extends State<PatientsView> {
         _error = null;
       });
 
-      final response =
-          await dio.get('${Config.apiBaseUrl}/patient/list');
+      final response = await dio.get('${Config.apiBaseUrl}/patient/list');
       if (response.statusCode == 200) {
         setState(() {
           _patients = response.data;
@@ -177,7 +175,7 @@ class _PatientsViewState extends State<PatientsView> {
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
-                  backgroundColor: AppTheme.turquoise.withOpacity(0.2),
+                  backgroundColor: AppTheme.turquoise.withAlpha((0.2 * 255).toInt()),
                   child: Text(
                     patient['name'][0].toUpperCase(),
                     style: TextStyle(

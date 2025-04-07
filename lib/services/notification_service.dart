@@ -128,8 +128,6 @@ class NotificationService {
       'Follow-up appointment for ${report.patientName}',
       tz.TZDateTime.from(followUpDate, tz.local),
       details,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       payload: report.id,
     );

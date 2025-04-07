@@ -31,12 +31,9 @@ class AuthRadioViewModel extends ChangeNotifier {
           'password': password,
         }),
       );
-
-      print('Response status: ${response.statusCode}'); // Add debug log
-      print('Response body: ${response.data}'); // Add debug log
-
+      
       if (response.statusCode == 200) {
-        final data = json.decode(response.data);
+        final data = response.data;
         authToken = data['token'];
         currentDoctor = Doctor(
           id: data['id'],

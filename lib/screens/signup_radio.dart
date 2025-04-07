@@ -386,7 +386,7 @@ class _SignupRadioViewState extends State<SignupRadioView> {
                                     margin: const EdgeInsets.only(top: 16),
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.1),
+                                      color: Colors.red.withAlpha((0.1 * 255).toInt()),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(

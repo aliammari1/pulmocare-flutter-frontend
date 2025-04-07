@@ -30,7 +30,6 @@ class LocationService {
       final placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
-        localeIdentifier: 'en',
       );
 
       if (placemarks.isNotEmpty) {

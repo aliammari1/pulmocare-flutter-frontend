@@ -24,7 +24,7 @@ class AppDrawer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withAlpha((0.1 * 255).toInt()),
                       spreadRadius: 5,
                       blurRadius: 15,
                       offset: const Offset(0, 3),
@@ -37,7 +37,7 @@ class AppDrawer extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
-                        color: AppTheme.paleBlue.withOpacity(0.1),
+                        color: AppTheme.paleBlue.withAlpha((0.1 * 255).toInt()),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(

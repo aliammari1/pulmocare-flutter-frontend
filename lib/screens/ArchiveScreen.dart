@@ -107,7 +107,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
         boxShadow: [
           BoxShadow(
             // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha((0.05 * 255).toInt()),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -169,7 +169,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
             style: TextButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               // ignore: deprecated_member_use
-              backgroundColor: primaryColor.withOpacity(0.1),
+              backgroundColor: primaryColor.withAlpha((0.1 * 255).toInt()),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -219,7 +219,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               style: TextButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 // ignore: deprecated_member_use
-                backgroundColor: primaryColor.withOpacity(0.1),
+                backgroundColor: primaryColor.withAlpha((0.1 * 255).toInt()),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -245,7 +245,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withAlpha((0.05 * 255).toInt()),
                   blurRadius: 8,
                   offset: Offset(0, 2),
                 ),
@@ -266,7 +266,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.1),
+                          color: primaryColor.withAlpha((0.1 * 255).toInt()),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -345,7 +345,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withAlpha((0.1 * 255).toInt()),
                   blurRadius: 10,
                   offset: Offset(0, 4),
                 ),
@@ -462,7 +462,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: primaryColor.withOpacity(0.1),
+            color: primaryColor.withAlpha((0.1 * 255).toInt()),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(

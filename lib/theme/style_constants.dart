@@ -49,7 +49,7 @@ class StyleConstants {
     borderRadius: BorderRadius.circular(8),
     boxShadow: [
       BoxShadow(
-        color: primaryColor.withOpacity(0.3),
+        color: primaryColor.withAlpha((0.3 * 255).toInt()),
         blurRadius: 8,
         offset: const Offset(0, 4),
       ),
@@ -82,7 +82,7 @@ class StyleConstants {
     borderRadius: BorderRadius.circular(12),
     boxShadow: [
       BoxShadow(
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withAlpha((0.1 * 255).toInt()),
         blurRadius: 10,
         offset: const Offset(0, 4),
       ),

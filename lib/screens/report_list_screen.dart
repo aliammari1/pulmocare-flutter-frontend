@@ -8,7 +8,6 @@ import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-
 class ReportListScreen extends StatefulWidget {
   const ReportListScreen({super.key});
 
@@ -562,7 +561,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
               onSelected: (_) => _applyFilter(filter),
               backgroundColor: Colors.grey[200],
               selectedColor:
-                  Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  Theme.of(context).colorScheme.primary.withAlpha((0.2 * 255).toInt()),
               checkmarkColor: Theme.of(context).colorScheme.primary,
               labelStyle: TextStyle(
                 color: isSelected
@@ -612,7 +611,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
       onPressed: () => _applySorting(sortKey),
       style: TextButton.styleFrom(
         backgroundColor: isSelected
-            ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+            ? Theme.of(context).colorScheme.primary.withAlpha((0.2 * 255).toInt())
             : null,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         shape: RoundedRectangleBorder(
@@ -647,7 +646,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
                 children: [
                   CircleAvatar(
                     backgroundColor:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        Theme.of(context).colorScheme.primary.withAlpha((0.1 * 255).toInt()),
                     radius: 24,
                     child: Text(
                       report.patientName.substring(0, 1).toUpperCase(),

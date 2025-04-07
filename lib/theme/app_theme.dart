@@ -26,7 +26,7 @@ class AppTheme {
     borderRadius: BorderRadius.circular(15),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.1),
+        color: Colors.black.withAlpha((0.1 * 255).toInt()),
         blurRadius: 10,
         offset: const Offset(0, 4),
       ),
@@ -38,7 +38,7 @@ class AppTheme {
     borderRadius: BorderRadius.circular(20),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withAlpha((0.2 * 255).toInt()),
         blurRadius: 15,
         offset: const Offset(0, 5),
       ),
@@ -120,7 +120,8 @@ class AppTheme {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: kPrimaryBlue.withOpacity(0.1)),
+            borderSide:
+                BorderSide(color: kPrimaryBlue.withAlpha((0.1 * 255).toInt())),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -141,7 +142,7 @@ class AppTheme {
             backgroundColor: kPrimaryBlue,
             foregroundColor: Colors.white,
             elevation: 4,
-            shadowColor: kPrimaryBlue.withOpacity(0.4),
+            shadowColor: kPrimaryBlue.withAlpha((0.4 * 255).toInt()),
             minimumSize: const Size(double.infinity, 56),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),

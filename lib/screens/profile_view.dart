@@ -39,9 +39,9 @@ class ProfileView extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        AppTheme.turquoise.withOpacity(0.8),
+                        AppTheme.turquoise.withAlpha((0.8 * 255).toInt()),
                         AppTheme.skyBlue,
-                        AppTheme.turquoise.withOpacity(0.9),
+                        AppTheme.turquoise.withAlpha((0.9 * 255).toInt()),
                       ],
                     ),
                     borderRadius: const BorderRadius.only(
@@ -106,7 +106,7 @@ class ProfileView extends StatelessWidget {
                         padding:
                             EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withAlpha((0.2 * 255).toInt()),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -225,7 +225,7 @@ class ProfileView extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withAlpha((0.1 * 255).toInt()),
             blurRadius: 20,
             offset: Offset(0, 5),
           ),
@@ -534,7 +534,7 @@ class ProfileView extends StatelessWidget {
                     margin: const EdgeInsets.only(top: 16),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withAlpha((0.1 * 255).toInt()),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

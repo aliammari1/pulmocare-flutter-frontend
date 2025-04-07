@@ -38,7 +38,7 @@ class AppDrawer extends StatelessWidget {
                 Text(
                   'Complete Medical Solution',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withAlpha((0.8 * 255).toInt()),
                     fontSize: 14,
                   ),
                 ),

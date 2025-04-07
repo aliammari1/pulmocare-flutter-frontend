@@ -92,7 +92,7 @@ class _HomeViewState extends State<HomeViewRadio> {
           border: Border(
             top: BorderSide(
               // ignore: deprecated_member_use
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withAlpha((0.2 * 255).toInt()),
               width: 1,
             ),
           ),

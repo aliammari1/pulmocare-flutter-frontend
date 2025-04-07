@@ -138,7 +138,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                 ? [
                                     BoxShadow(
                                       color: const Color(0xFF1E88E5)
-                                          .withOpacity(0.3),
+                                          .withAlpha((0.3 * 255).toInt()),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     )

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:printing/printing.dart';
-import 'package:pdf/pdf.dart'; // Add this import for PdfPageFormat
+import 'package:pdf/pdf.dart';
 import 'package:intl/intl.dart';
 import '../services/ordonnance_viewmodel.dart';
 

@@ -166,7 +166,8 @@ class _PatientLoginViewState extends State<PatientLoginView> {
                               if (result == true) {
                                 // Face authentication successful
                                 // Implement face login logic here
-                                final authVM = context.read<PatientAuthViewModel>();
+                                final authVM =
+                                    context.read<PatientAuthViewModel>();
                                 try {
                                   await authVM.loginWithFace();
                                   if (mounted && authVM.isAuthenticated) {
@@ -261,7 +262,7 @@ class _PatientLoginViewState extends State<PatientLoginView> {
                                 margin: const EdgeInsets.only(top: 16),
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.1),
+                                  color: Colors.red.withAlpha((0.1 * 255).toInt()),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(

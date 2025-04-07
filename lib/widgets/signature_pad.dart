@@ -59,7 +59,7 @@ class SignaturePadState extends State<SignaturePad> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withAlpha((0.2 * 255).toInt()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -183,7 +183,7 @@ class SignaturePadState extends State<SignaturePad> {
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
+              color: color.withAlpha((0.3 * 255).toInt()),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

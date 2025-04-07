@@ -159,7 +159,7 @@ class _MapSelectionDialogState extends State<MapSelectionDialog> {
                       trafficEnabled: _trafficEnabled,
                       myLocationEnabled: true,
                       myLocationButtonEnabled: false,
-                      zoomControlsEnabled: false, 
+                      zoomControlsEnabled: false,
                       mapToolbarEnabled: true,
                       buildingsEnabled: true,
                       onTap: (latLng) async {
@@ -193,7 +193,7 @@ class _MapSelectionDialogState extends State<MapSelectionDialog> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -223,7 +223,7 @@ class _MapSelectionDialogState extends State<MapSelectionDialog> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -255,7 +255,7 @@ class _MapSelectionDialogState extends State<MapSelectionDialog> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withAlpha((0.1 * 255).toInt()),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
