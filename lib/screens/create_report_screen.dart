@@ -10,7 +10,8 @@ import 'handwriting_screen.dart';
 import 'voice_dictation_screen.dart';
 import '../services/report_service.dart';
 import 'package:uuid/uuid.dart';
-import 'report_editor_screen.dart'; // Import the new report editor
+import 'report_editor_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateReportScreen extends StatefulWidget {
   const CreateReportScreen({super.key});
@@ -303,18 +304,17 @@ class _CreateReportScreenState extends State<CreateReportScreen>
                 textColor: Colors.white,
                 onPressed: () {
                   // Navigate to report details
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ReportListScreen(),
-                    ),
-                  );
+                  context.pop();
+                  // context.pushReplacement(
+                  //   MaterialPageRoute(
+                  //     builder: (context) => ReportListScreen(),
+                  //   ),
+                  // );
                 },
               ),
             ),
           );
-          Navigator.pop(context);
+          context.pop();
         }
       } catch (e) {
         if (mounted) {
@@ -353,38 +353,37 @@ class _CreateReportScreenState extends State<CreateReportScreen>
     }
 
     // Navigate to the report editor
-    final result = await Navigator.push<String>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ReportEditorScreen(
-          initialContent: initialContent,
-          reportId: _generatedId,
-          patientName: _patientNameController.text.isNotEmpty
-              ? _patientNameController.text
-              : 'New Patient',
-        ),
-      ),
-    );
+    // final result = await context.push<String>(
+    //   MaterialPageRoute(
+    //     builder: (context) => ReportEditorScreen(
+    //       initialContent: initialContent,
+    //       reportId: _generatedId,
+    //       patientName: _patientNameController.text.isNotEmpty
+    //           ? _patientNameController.text
+    //           : 'New Patient',
+    //     ),
+    //   ),
+    // );
 
     // Update the appropriate field with the result
-    if (result != null) {
-      setState(() {
-        switch (sectionName) {
-          case 'symptoms':
-            _symptomsController.text = result;
-            break;
-          case 'diagnosis':
-            _diagnosisController.text = result;
-            break;
-          case 'prescription':
-            _prescriptionController.text = result;
-            break;
-          case 'notes':
-            _notesController.text = result;
-            break;
-        }
-      });
-    }
+    // if (result != null) {
+    //   setState(() {
+    //     switch (sectionName) {
+    //       case 'symptoms':
+    //         _symptomsController.text = result;
+    //         break;
+    //       case 'diagnosis':
+    //         _diagnosisController.text = result;
+    //         break;
+    //       case 'prescription':
+    //         _prescriptionController.text = result;
+    //         break;
+    //       case 'notes':
+    //         _notesController.text = result;
+    //         break;
+    //     }
+    //   });
+    // }
   }
 
   @override
@@ -400,11 +399,11 @@ class _CreateReportScreenState extends State<CreateReportScreen>
                   'You have unsaved changes. Are you sure you want to discard them?'),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context, false),
+                  onPressed: () => context.pop(false),
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.pop(context, true),
+                  onPressed: () => context.pop(true),
                   child: const Text('Discard'),
                 ),
               ],
@@ -542,18 +541,18 @@ class _CreateReportScreenState extends State<CreateReportScreen>
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () async {
-                              final result = await Navigator.push<String>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const HandwritingScreen(),
-                                ),
-                              );
-                              if (result != null) {
-                                setState(() {
-                                  _notesController.text += result;
-                                });
-                              }
+                              // final result = await context.push<String>(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) =>
+                              //         const HandwritingScreen(),
+                              //   ),
+                              // );
+                              // if (result != null) {
+                              //   setState(() {
+                              //     _notesController.text += result;
+                              //   });
+                              // }
                             },
                             icon: const Icon(Icons.draw),
                             label: const Text('Add Handwriting'),
@@ -566,18 +565,18 @@ class _CreateReportScreenState extends State<CreateReportScreen>
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () async {
-                              final result = await Navigator.push<String>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const VoiceDictationScreen(),
-                                ),
-                              );
-                              if (result != null) {
-                                setState(() {
-                                  _notesController.text += result;
-                                });
-                              }
+                              // final result = await context.push<String>(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) =>
+                              //         const VoiceDictationScreen(),
+                              //   ),
+                              // );
+                              // if (result != null) {
+                              //   setState(() {
+                              //     _notesController.text += result;
+                              //   });
+                              // }
                             },
                             icon: const Icon(Icons.mic),
                             label: const Text('Add Voice Note'),
@@ -599,7 +598,7 @@ class _CreateReportScreenState extends State<CreateReportScreen>
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => context.pop(),
                   icon: const Icon(Icons.cancel),
                   label: const Text('Cancel'),
                   style: ElevatedButton.styleFrom(

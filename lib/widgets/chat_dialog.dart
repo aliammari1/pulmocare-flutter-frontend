@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/chat_viewmodel.dart';
 import '../theme/app_theme.dart';
 import '../utils/medical_prompts.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatMessage {
   final String id;
@@ -62,7 +63,7 @@ class _ChatDialogState extends State<ChatDialog> {
         ),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: message.isBot ? Colors.white : AppTheme.turquoise,
+          color: message.isBot ? Colors.white : AppTheme.primaryColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -159,7 +160,7 @@ class _ChatDialogState extends State<ChatDialog> {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppTheme.turquoise,
+                                color: AppTheme.primaryColor,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -218,7 +219,7 @@ class _ChatDialogState extends State<ChatDialog> {
           const SizedBox(width: 8),
           Container(
             decoration: const BoxDecoration(
-              color: AppTheme.turquoise,
+              color: AppTheme.primaryColor,
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -246,15 +247,15 @@ class _ChatDialogState extends State<ChatDialog> {
       appBar: AppBar(
         title: const Text(
           'Medical AI Assistant',
-          style: TextStyle(color: AppTheme.turquoise),
+          style: TextStyle(color: AppTheme.primaryColor),
         ),
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppTheme.turquoise),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.close, color: AppTheme.primaryColor),
+          onPressed: () => context.pop(),
         ),
-        iconTheme: const IconThemeData(color: AppTheme.turquoise),
+        iconTheme: const IconThemeData(color: AppTheme.primaryColor),
       ),
       body: Column(
         children: [

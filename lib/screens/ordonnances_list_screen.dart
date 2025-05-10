@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../services/ordonnance_viewmodel.dart';
 import 'pdf_actions_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class OrdonnancesListScreen extends StatefulWidget {
   const OrdonnancesListScreen({super.key});
@@ -28,7 +29,7 @@ class _OrdonnancesListScreenState extends State<OrdonnancesListScreen> {
             backgroundColor: Colors.orange,
           ),
         );
-        Navigator.pushReplacementNamed(context, '/new-ordonnance');
+        context.pushReplacementNamed('/new-ordonnance');
         return;
       }
 
@@ -90,12 +91,11 @@ class _OrdonnancesListScreenState extends State<OrdonnancesListScreen> {
                       final pdfBytes =
                           await viewModel.generatePdfFromData(ordonnance);
                       if (pdfBytes != null && context.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PdfActionsScreen(),
-                          ),
-                        );
+                        // context.push(
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const PdfActionsScreen(),
+                        //   ),
+                        // );
                       }
                     },
                   ),
@@ -107,7 +107,7 @@ class _OrdonnancesListScreenState extends State<OrdonnancesListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/new-ordonnance');
+          context.pushNamed('/new-ordonnance');
         },
         tooltip: 'Nouvelle ordonnance',
         child: const Icon(Icons.add),

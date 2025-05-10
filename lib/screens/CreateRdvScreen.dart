@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateRdvScreen extends StatefulWidget {
   const CreateRdvScreen({super.key});
@@ -70,7 +71,7 @@ class _CreateRdvScreenState extends State<CreateRdvScreen> {
     if (nameController.text.isNotEmpty &&
         selectedDate != null &&
         selectedTime != null) {
-      Navigator.pop(context, {
+      context.pop({
         "name": nameController.text,
         "date": "${selectedDate!.day}/${selectedDate!.month}",
         "time": selectedTime!.format(context),
@@ -111,7 +112,7 @@ class _CreateRdvScreenState extends State<CreateRdvScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2C3E50)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       body: SingleChildScrollView(

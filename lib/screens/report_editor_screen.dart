@@ -4,6 +4,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'dart:ui' as ui;
 import '../services/ai_service.dart';
+import 'package:go_router/go_router.dart';
 
 class ReportEditorScreen extends StatefulWidget {
   final String initialContent;
@@ -97,7 +98,7 @@ class _ReportEditorScreenState extends State<ReportEditorScreen>
               const Text('Speech recognition is not available on this device.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => context.pop(),
               child: const Text('OK'),
             ),
           ],
@@ -412,7 +413,7 @@ class _ReportEditorScreenState extends State<ReportEditorScreen>
             tooltip: 'Save Report',
             onPressed: () {
               // Save logic here
-              Navigator.pop(context, _textController.text);
+              context.pop(_textController.text);
             },
           ),
         ],

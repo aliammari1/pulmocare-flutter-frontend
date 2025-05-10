@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class NavigationService {
   static Future<void> navigateToPdfActions(
@@ -6,9 +7,9 @@ class NavigationService {
     bool withAnimation = true,
   }) async {
     if (withAnimation) {
-      await Navigator.pushNamed(context, '/pdf-actions');
+      await context.pushNamed('/pdf-actions');
     } else {
-      await Navigator.pushReplacementNamed(context, '/pdf-actions');
+      await context.pushNamed('/pdf-actions');
     }
   }
 

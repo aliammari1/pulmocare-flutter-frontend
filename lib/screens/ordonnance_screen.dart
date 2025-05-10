@@ -8,6 +8,7 @@ import '../widgets/signature_pad.dart';
 import '../widgets/cachet_medecin.dart';
 import '../models/ordonnance.dart';
 import '../theme/style_constants.dart';
+import 'package:go_router/go_router.dart';
 
 class OrdonnanceScreen extends StatefulWidget {
   const OrdonnanceScreen({super.key});
@@ -433,7 +434,7 @@ class _OrdonnanceScreenState extends State<OrdonnanceScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
             child: const Text('Fermer'),
           ),
         ],
@@ -621,13 +622,13 @@ class _OrdonnanceScreenState extends State<OrdonnanceScreen> {
         content: Text('Voulez-vous retirer ${med.name} de l\'ordonnance ?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
             child: const Text('Annuler'),
           ),
           TextButton(
             onPressed: () {
               setState(() => medicaments.remove(med));
-              Navigator.pop(context);
+              context.pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('${med.name} retiré de l\'ordonnance'),
@@ -695,7 +696,7 @@ class _OrdonnanceScreenState extends State<OrdonnanceScreen> {
         ElevatedButton.icon(
           icon: const Icon(StyleConstants.ordonnanceIcon),
           label: const Text('Mes Ordonnances'),
-          onPressed: () => Navigator.pushNamed(context, '/ordonnances-list'),
+          onPressed: () => context.pushNamed('/ordonnances-list'),
           style: ElevatedButton.styleFrom(
             backgroundColor: StyleConstants.secondaryColor,
           ),
@@ -733,7 +734,7 @@ class _OrdonnanceScreenState extends State<OrdonnanceScreen> {
       final success = await viewModel.createOrdonnance(ordonnance);
 
       if (context.mounted) {
-        Navigator.pop(context); // Fermer le dialogue de transition
+        context.pop(); // Fermer le dialogue de transition
 
         if (success) {
           await NavigationService.navigateToPdfActions(context);
@@ -748,7 +749,7 @@ class _OrdonnanceScreenState extends State<OrdonnanceScreen> {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context); // Fermer le dialogue de transition
+        context.pop(); // Fermer le dialogue de transition
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),

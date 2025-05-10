@@ -6,6 +6,10 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import '../widgets/verification_alert.dart';
 import 'signature_view.dart';
+import 'package:go_router/go_router.dart';
+import '../models/doctor.dart';
+import '../models/patient.dart';
+import '../models/radiologist.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -16,15 +20,16 @@ class ProfileView extends StatelessWidget {
       onWillPop: () async => false, // Prevent back navigation
       child: Consumer<AuthViewModel>(
         builder: (context, authVM, child) {
-          final doctor = authVM.currentDoctor;
-          if (doctor == null) {
+          // Get user based on role
+          final user = authVM.currentUser;
+          if (user == null) {
             return const Center(
-              child: CircularProgressIndicator(color: AppTheme.turquoise),
+              child: CircularProgressIndicator(color: AppTheme.primaryColor),
             );
           }
 
-          final imageBytes = doctor.profileImage != null
-              ? base64Decode(doctor.profileImage!)
+          final imageBytes = user.profilePicture != null
+              ? base64Decode(user.profilePicture!)
               : null;
 
           return SingleChildScrollView(
@@ -39,9 +44,9 @@ class ProfileView extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        AppTheme.turquoise.withAlpha((0.8 * 255).toInt()),
-                        AppTheme.skyBlue,
-                        AppTheme.turquoise.withAlpha((0.9 * 255).toInt()),
+                        AppTheme.primaryColor.withAlpha((0.8 * 255).toInt()),
+                        AppTheme.accentColor,
+                        AppTheme.primaryColor.withAlpha((0.9 * 255).toInt()),
                       ],
                     ),
                     borderRadius: const BorderRadius.only(
@@ -73,13 +78,13 @@ class ProfileView extends StatelessWidget {
                             backgroundColor: Colors.white,
                             child: CircleAvatar(
                               radius: 65,
-                              backgroundColor: AppTheme.lightGray,
+                              backgroundColor: AppTheme.disabledColor,
                               backgroundImage: imageBytes != null
                                   ? MemoryImage(imageBytes)
                                   : null,
                               child: imageBytes == null
                                   ? Icon(Icons.person,
-                                      size: 65, color: AppTheme.turquoise)
+                                      size: 65, color: AppTheme.primaryColor)
                                   : null,
                             ),
                           ),
@@ -87,7 +92,7 @@ class ProfileView extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        doctor.name,
+                        user.name!,
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -102,29 +107,18 @@ class ProfileView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha((0.2 * 255).toInt()),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          doctor.specialty,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
+
+                      // Role-specific subtitle
+                      _buildRoleSpecificSubtitle(authVM),
+
                       const SizedBox(height: 30),
                     ],
                   ),
                 ),
 
-                // Verification Alert
-                VerificationAlert(isVerified: doctor.isVerified),
+                // Verification Alert for professionals (Doctor, Radiologist)
+                if (authVM.role == 'doctor' || authVM.role == 'radiologist')
+                  VerificationAlert(isVerified: _isUserVerified(authVM)),
 
                 // Information Cards with enhanced design
                 Padding(
@@ -134,53 +128,58 @@ class ProfileView extends StatelessWidget {
                       _buildModernInfoCard(
                         Icons.email_outlined,
                         'Email Address',
-                        doctor.email,
-                        AppTheme.turquoise,
+                        user.email!,
+                        AppTheme.primaryColor,
                       ),
                       _buildModernInfoCard(
                         Icons.phone_outlined,
                         'Phone Number',
-                        doctor.phoneNumber,
-                        AppTheme.skyBlue,
+                        user.phone ?? 'Not provided',
+                        AppTheme.accentColor,
                       ),
                       _buildModernInfoCard(
                         Icons.location_on_outlined,
-                        'Office Address',
-                        doctor.address,
-                        AppTheme.turquoise,
+                        'Address',
+                        user.address ?? 'Not provided',
+                        AppTheme.primaryColor,
                       ),
+
+                      // Role-specific information cards
+                      ..._buildRoleSpecificInfoCards(authVM),
+
                       const SizedBox(height: 24),
 
-                      // Replace old signature button with this new one
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: ElevatedButton.icon(
-                          onPressed: () => doctor.signature != null
-                              ? _showSignatureDialog(context, doctor.signature!)
-                              : _showSignatureCreationDialog(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.paleBlue,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      // Signature button for professionals (Doctor, Radiologist)
+                      if (authVM.role == 'doctor' ||
+                          authVM.role == 'radiologist')
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: ElevatedButton.icon(
+                            onPressed: () =>
+                                _handleSignatureAction(context, authVM),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.secondaryColor,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
-                          ),
-                          icon: Icon(
-                              doctor.signature != null ? Icons.draw : Icons.add,
-                              color: Colors.black87),
-                          label: Text(
-                            doctor.signature != null
-                                ? 'View Signature'
-                                : 'Add Signature',
-                            style: const TextStyle(
-                              color: Colors.black87,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                            icon: Icon(
+                                _hasSignature(authVM) ? Icons.draw : Icons.add,
+                                color: Colors.black87),
+                            label: Text(
+                              _hasSignature(authVM)
+                                  ? 'View Signature'
+                                  : 'Add Signature',
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
                       // Modern Action Buttons
                       Row(
@@ -189,7 +188,7 @@ class ProfileView extends StatelessWidget {
                             child: _buildActionButton(
                               'Change\nPassword',
                               Icons.lock_outline,
-                              AppTheme.turquoise,
+                              AppTheme.primaryColor,
                               () => _showChangePasswordDialog(context),
                             ),
                           ),
@@ -198,7 +197,7 @@ class ProfileView extends StatelessWidget {
                             child: _buildActionButton(
                               'Edit\nProfile',
                               Icons.edit_outlined,
-                              AppTheme.skyBlue,
+                              AppTheme.accentColor,
                               () => _showEditProfileDialog(context),
                             ),
                           ),
@@ -213,6 +212,197 @@ class ProfileView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Widget _buildRoleSpecificSubtitle(AuthViewModel authVM) {
+    switch (authVM.role) {
+      case 'doctor':
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha((0.2 * 255).toInt()),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            (authVM.currentDoctor as Doctor).specialty,
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        );
+      case 'radiologist':
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha((0.2 * 255).toInt()),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'Radiologist',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        );
+      case 'patient':
+        final patient = authVM.currentPatient as Patient?;
+        final blood_type = patient?.blood_type;
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha((0.2 * 255).toInt()),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            blood_type != null ? 'Blood Type: $blood_type' : 'Patient',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        );
+      default:
+        return SizedBox.shrink();
+    }
+  }
+
+  List<Widget> _buildRoleSpecificInfoCards(AuthViewModel authVM) {
+    final cards = <Widget>[];
+
+    switch (authVM.role) {
+      case 'doctor':
+        final doctor = authVM.currentDoctor as Doctor;
+        cards.add(_buildModernInfoCard(
+          Icons.medical_services_outlined,
+          'Specialty',
+          doctor.specialty,
+          Colors.teal,
+        ));
+        if (doctor.hospital != null && doctor.hospital!.isNotEmpty) {
+          cards.add(_buildModernInfoCard(
+            Icons.local_hospital_outlined,
+            'Hospital',
+            doctor.hospital!,
+            Colors.indigo,
+          ));
+        }
+        break;
+      case 'radiologist':
+        final radiologist = authVM.currentRadiologist as Radiologist?;
+        if (radiologist?.hospital != null) {
+          cards.add(_buildModernInfoCard(
+            Icons.local_hospital_outlined,
+            'Hospital',
+            radiologist!.hospital!,
+            Colors.indigo,
+          ));
+        }
+        if (radiologist?.licenseNumber != null) {
+          cards.add(_buildModernInfoCard(
+            Icons.badge_outlined,
+            'License Number',
+            radiologist!.licenseNumber!,
+            Colors.purple,
+          ));
+        }
+        break;
+      case 'patient':
+        final patient = authVM.currentPatient as Patient?;
+        if (patient?.date_of_birth != null) {
+          cards.add(_buildModernInfoCard(
+            Icons.cake_outlined,
+            'Date of Birth',
+            patient!.date_of_birth!,
+            Colors.amber.shade700,
+          ));
+        }
+        if (patient?.blood_type != null) {
+          cards.add(_buildModernInfoCard(
+            Icons.bloodtype_outlined,
+            'Blood Type',
+            patient!.blood_type!,
+            Colors.red,
+          ));
+        }
+        if (patient?.height != null || patient?.weight != null) {
+          final heightWeight = [];
+          if (patient?.height != null)
+            heightWeight.add('Height: ${patient!.height}');
+          if (patient?.weight != null)
+            heightWeight.add('Weight: ${patient!.weight}');
+
+          cards.add(_buildModernInfoCard(
+            Icons.accessibility_new_outlined,
+            'Physical',
+            heightWeight.join(' | '),
+            Colors.green,
+          ));
+        }
+        break;
+    }
+
+    return cards;
+  }
+
+  bool _isUserVerified(AuthViewModel authVM) {
+    if (authVM.role == 'doctor') {
+      return (authVM.currentDoctor as Doctor?)?.isVerified ?? false;
+    } else if (authVM.role == 'radiologist') {
+      // The currentRadiologist is defined as User?, but we need to check isVerified
+      // Since User doesn't have isVerified property, we'll return false for now
+      // Or implement a proper verification check method for radiologists if needed
+      return false;
+    }
+    return false;
+  }
+
+  bool _hasSignature(AuthViewModel authVM) {
+    if (authVM.role == 'doctor') {
+      return (authVM.currentDoctor as Doctor?)?.signature != null;
+    } else if (authVM.role == 'radiologist') {
+      // Since User doesn't have signature property, we need to modify this
+      return false;
+    }
+    return false;
+  }
+
+  void _handleSignatureAction(BuildContext context, AuthViewModel authVM) {
+    String? signature;
+
+    if (authVM.role == 'doctor') {
+      signature = (authVM.currentDoctor as Doctor?)?.signature;
+    } else if (authVM.role == 'radiologist') {
+      // Since User doesn't have signature property, signatures for radiologists
+      // need to be handled differently. For now, we'll just use null.
+      signature = null;
+    }
+
+    if (signature != null) {
+      _showSignatureDialog(context, signature);
+    } else {
+      _showSignatureCreationDialog(context);
+    }
+  }
+
+  void _showSignatureAction(BuildContext context, AuthViewModel authVM) {
+    String? signature;
+
+    if (authVM.role == 'doctor') {
+      signature = (authVM.currentDoctor as Doctor?)?.signature;
+    } else if (authVM.role == 'radiologist') {
+      signature = (authVM.currentRadiologist as Radiologist?)?.signature;
+    }
+
+    if (signature != null) {
+      _showSignatureDialog(context, signature);
+    } else {
+      _showSignatureCreationDialog(context);
+    }
   }
 
   Widget _buildModernInfoCard(
@@ -377,7 +567,7 @@ class ProfileView extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx),
+              onPressed: () => context.pop(ctx),
               child: const Text('Cancel'),
             ),
             TextButton(
@@ -391,7 +581,7 @@ class ProfileView extends StatelessWidget {
 
                     final error = context.read<AuthViewModel>().errorMessage;
                     if (error.isEmpty) {
-                      Navigator.pop(ctx);
+                      context.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Password updated successfully'),
@@ -421,7 +611,7 @@ class ProfileView extends StatelessWidget {
     final specialtyController =
         TextEditingController(text: authVM.currentDoctor?.specialty);
     final phoneController =
-        TextEditingController(text: authVM.currentDoctor?.phoneNumber);
+        TextEditingController(text: authVM.currentDoctor?.phone);
     final addressController =
         TextEditingController(text: authVM.currentDoctor?.address);
     XFile? selectedImage;
@@ -434,7 +624,7 @@ class ProfileView extends StatelessWidget {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Container(
-            decoration: AppTheme.dialogDecoration,
+            decoration: AppTheme.cardDecoration(),
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -447,19 +637,20 @@ class ProfileView extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.turquoise,
+                        color: AppTheme.primaryColor,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: AppTheme.skyBlue),
-                      onPressed: () => Navigator.pop(ctx),
+                      icon:
+                          const Icon(Icons.close, color: AppTheme.accentColor),
+                      onPressed: () => context.pop(ctx),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppTheme.lightGray,
+                    color: AppTheme.secondaryColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   padding: const EdgeInsets.all(16),
@@ -467,37 +658,33 @@ class ProfileView extends StatelessWidget {
                     children: [
                       TextField(
                         controller: nameController,
-                        decoration: AppTheme.inputDecoration.copyWith(
+                        decoration: AppTheme.inputDecoration(
                           labelText: 'Name',
-                          prefixIcon: const Icon(Icons.person,
-                              color: AppTheme.turquoise),
+                          prefixIcon: Icons.person,
                         ),
                       ),
                       const SizedBox(height: 16),
                       TextField(
                         controller: specialtyController,
-                        decoration: AppTheme.inputDecoration.copyWith(
+                        decoration: AppTheme.inputDecoration(
                           labelText: 'Specialty',
-                          prefixIcon: const Icon(Icons.medical_services,
-                              color: AppTheme.turquoise),
+                          prefixIcon: Icons.medical_services,
                         ),
                       ),
                       const SizedBox(height: 16),
                       TextField(
                         controller: phoneController,
-                        decoration: AppTheme.inputDecoration.copyWith(
+                        decoration: AppTheme.inputDecoration(
                           labelText: 'Phone',
-                          prefixIcon: const Icon(Icons.phone,
-                              color: AppTheme.turquoise),
+                          prefixIcon: Icons.phone,
                         ),
                       ),
                       const SizedBox(height: 16),
                       TextField(
                         controller: addressController,
-                        decoration: AppTheme.inputDecoration.copyWith(
+                        decoration: AppTheme.inputDecoration(
                           labelText: 'Address',
-                          prefixIcon: const Icon(Icons.location_on,
-                              color: AppTheme.turquoise),
+                          prefixIcon: Icons.location_on,
                         ),
                       ),
                     ],
@@ -507,11 +694,6 @@ class ProfileView extends StatelessWidget {
                 ElevatedButton.icon(
                   icon: const Icon(Icons.image),
                   label: const Text('Select Profile Image'),
-                  style: AppTheme.buttonStyle.copyWith(
-                    backgroundColor: WidgetStateProperty.all(AppTheme.skyBlue),
-                    minimumSize: WidgetStateProperty.all(
-                        const Size(double.infinity, 50)),
-                  ),
                   onPressed: () async {
                     final picker = ImagePicker();
                     final image =
@@ -526,7 +708,7 @@ class ProfileView extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       'Selected: ${selectedImage!.name}',
-                      style: const TextStyle(color: AppTheme.turquoise),
+                      style: const TextStyle(color: AppTheme.primaryColor),
                     ),
                   ),
                 if (errorText.isNotEmpty)
@@ -547,7 +729,7 @@ class ProfileView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: TextButton(
-                        onPressed: () => Navigator.pop(ctx),
+                        onPressed: () => context.pop(ctx),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.grey,
                         ),
@@ -563,15 +745,15 @@ class ProfileView extends StatelessWidget {
                                 ? base64Encode(
                                     await selectedImage!.readAsBytes())
                                 : null;
-                            await authVM.updateProfile(
+                            await authVM.updateDoctorProfile(
                               name: nameController.text.trim(),
                               specialty: specialtyController.text.trim(),
-                              phoneNumber: phoneController.text.trim(),
+                              phone: phoneController.text.trim(),
                               address: addressController.text.trim(),
-                              base64Image: base64Image,
+                              profileImage: base64Image,
                             );
                             if (authVM.errorMessage.isEmpty) {
-                              Navigator.pop(ctx);
+                              context.pop(ctx);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                     content: Text('Profile updated')),
@@ -583,7 +765,6 @@ class ProfileView extends StatelessWidget {
                             setState(() => errorText = 'Error: $e');
                           }
                         },
-                        style: AppTheme.buttonStyle,
                         child: const Text('Save Changes'),
                       ),
                     ),
@@ -626,7 +807,7 @@ class ProfileView extends StatelessWidget {
                 width: double.infinity,
                 height: 200,
                 decoration: BoxDecoration(
-                  border: Border.all(color: AppTheme.turquoise, width: 2),
+                  border: Border.all(color: AppTheme.primaryColor, width: 2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ClipRRect(
@@ -643,7 +824,7 @@ class ProfileView extends StatelessWidget {
                 children: [
                   TextButton.icon(
                     onPressed: () {
-                      Navigator.pop(context);
+                      context.pop();
                       _showSignatureCreationDialog(
                           context); // Show new signature dialog
                     },
@@ -651,7 +832,7 @@ class ProfileView extends StatelessWidget {
                     label: const Text('Change'),
                   ),
                   TextButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => context.pop(),
                     icon: const Icon(Icons.close),
                     label: const Text('Close'),
                   ),

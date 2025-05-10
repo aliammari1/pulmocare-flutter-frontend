@@ -7,6 +7,7 @@ import 'create_report_screen.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:go_router/go_router.dart';
 
 class ReportListScreen extends StatefulWidget {
   const ReportListScreen({super.key});
@@ -232,7 +233,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () {
-                                Navigator.pop(context);
+                                context.pop();
                                 // Navigate to edit screen with the report data
                               },
                             ),
@@ -242,7 +243,7 @@ class _ReportListScreenState extends State<ReportListScreen> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: () => context.pop(),
                             ),
                           ],
                         ),
@@ -528,15 +529,17 @@ class _ReportListScreenState extends State<ReportListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateReportScreen(),
-            ),
-          ).then((_) {
-            // Refresh list after creating a new report
-            // In a real app, this would fetch updated data
-          });
+          // context
+          //     .push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => const CreateReportScreen(),
+          //   ),
+          // )
+          //     .then((_) {
+          //   // Refresh list after creating a new report
+          //   // In a real app, this would fetch updated data
+          // });
         },
         backgroundColor: Theme.of(context).colorScheme.secondary,
         tooltip: 'Create Report',
@@ -560,8 +563,10 @@ class _ReportListScreenState extends State<ReportListScreen> {
               selected: isSelected,
               onSelected: (_) => _applyFilter(filter),
               backgroundColor: Colors.grey[200],
-              selectedColor:
-                  Theme.of(context).colorScheme.primary.withAlpha((0.2 * 255).toInt()),
+              selectedColor: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withAlpha((0.2 * 255).toInt()),
               checkmarkColor: Theme.of(context).colorScheme.primary,
               labelStyle: TextStyle(
                 color: isSelected
@@ -611,7 +616,10 @@ class _ReportListScreenState extends State<ReportListScreen> {
       onPressed: () => _applySorting(sortKey),
       style: TextButton.styleFrom(
         backgroundColor: isSelected
-            ? Theme.of(context).colorScheme.primary.withAlpha((0.2 * 255).toInt())
+            ? Theme.of(context)
+                .colorScheme
+                .primary
+                .withAlpha((0.2 * 255).toInt())
             : null,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         shape: RoundedRectangleBorder(
@@ -645,8 +653,10 @@ class _ReportListScreenState extends State<ReportListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.primary.withAlpha((0.1 * 255).toInt()),
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withAlpha((0.1 * 255).toInt()),
                     radius: 24,
                     child: Text(
                       report.patientName.substring(0, 1).toUpperCase(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medapp/services/rapport_service.dart';
+import 'package:go_router/go_router.dart';
 
 // Constantes de couleurs pour le thème médical moderne
 const Color primaryColor = Color(0xFF4FC3F7); // Bleu ciel
@@ -421,7 +422,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                 ),
                 SizedBox(height: 20),
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => context.pop(),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,

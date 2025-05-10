@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:typed_data';
+import 'package:go_router/go_router.dart';
 
 class HandwritingScreen extends StatefulWidget {
   const HandwritingScreen({super.key});
@@ -200,7 +201,7 @@ class _HandwritingScreenState extends State<HandwritingScreen> {
     }
 
     if (result.isNotEmpty) {
-      Navigator.pop(context, result);
+      context.pop(result);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please write something first')),
@@ -485,7 +486,7 @@ class HandwritingPainter extends CustomPainter {
           stroke[i + 1].point,
           stroke[i].paint,
         );
-            }
+      }
     }
   }
 

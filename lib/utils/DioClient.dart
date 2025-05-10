@@ -23,6 +23,7 @@ class DioHttpClient {
     dio.interceptors.add(PrettyDioLogger(
       request: true,
       requestHeader: true,
+      requestBody: true,
       responseHeader: false,
       responseBody: true,
       error: true,

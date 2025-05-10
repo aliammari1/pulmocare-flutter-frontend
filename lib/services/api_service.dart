@@ -12,7 +12,6 @@ class ApiService {
   Map<String, String> _getHeaders() {
     return {
       'Content-Type': 'application/json',
-      'X-Request-ID': DateTime.now().microsecondsSinceEpoch.toString(),
     };
   }
 

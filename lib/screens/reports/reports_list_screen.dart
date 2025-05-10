@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/report.dart';
 import '../../services/api_service.dart';
 import 'report_detail_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class ReportsListScreen extends StatefulWidget {
   const ReportsListScreen({super.key});
@@ -69,13 +70,15 @@ class _ReportsListScreenState extends State<ReportsListScreen> {
                     '${report.createdAt.day}/${report.createdAt.month}/${report.createdAt.year}',
                   ),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ReportDetailScreen(reportId: report.id),
-                      ),
-                    ).then((_) => _loadReports());
+                    // context
+                    //     .push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (context) =>
+                    //             ReportDetailScreen(reportId: report.id),
+                    //       ),
+                    //     )
+                    //     .then((_) => _loadReports());
                   },
                 ),
               );

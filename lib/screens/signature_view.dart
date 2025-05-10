@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_view_model.dart';
 import 'dart:convert';
+import 'package:go_router/go_router.dart';
 
 class SignatureView extends StatefulWidget {
   final String? existingSignature;
@@ -45,7 +46,9 @@ class _SignatureViewState extends State<SignatureView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.existingSignature != null ? 'Update Signature' : 'Add Signature',
+                widget.existingSignature != null
+                    ? 'Update Signature'
+                    : 'Add Signature',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -53,7 +56,7 @@ class _SignatureViewState extends State<SignatureView> {
               ),
               IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => context.pop(),
               ),
             ],
           ),
@@ -63,7 +66,7 @@ class _SignatureViewState extends State<SignatureView> {
               child: Container(
                 height: 100,
                 decoration: BoxDecoration(
-                  border: Border.all(color: AppTheme.paleBlue),
+                  border: Border.all(color: AppTheme.secondaryColor),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ClipRRect(
@@ -79,7 +82,7 @@ class _SignatureViewState extends State<SignatureView> {
           Container(
             height: 300,
             decoration: BoxDecoration(
-              border: Border.all(color: AppTheme.turquoise),
+              border: Border.all(color: AppTheme.primaryColor),
               borderRadius: BorderRadius.circular(12),
             ),
             child: ClipRRect(
@@ -116,12 +119,12 @@ class _SignatureViewState extends State<SignatureView> {
                                   .read<AuthViewModel>()
                                   .errorMessage
                                   .isEmpty) {
-                            Navigator.pop(
+                            context.pop(
                                 context); // Close dialog after successful save
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.turquoise,
+                    backgroundColor: AppTheme.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   icon: _isSaving

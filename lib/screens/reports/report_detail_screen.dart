@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/report.dart';
 import '../../services/api_service.dart';
+import 'package:go_router/go_router.dart';
 
 class ReportDetailScreen extends StatefulWidget {
   final String reportId;
@@ -51,12 +52,12 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                       'Are you sure you want to delete this report?'),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context, false),
+                      onPressed: () => context.pop(false),
                       child: const Text('Cancel'),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      onPressed: () => Navigator.pop(context, true),
+                      onPressed: () => context.pop(true),
                       child: const Text('Delete'),
                     ),
                   ],
@@ -71,7 +72,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                       const SnackBar(
                           content: Text('Report deleted successfully')),
                     );
-                    Navigator.pop(currentContext);
+                    context.pop(currentContext);
                   }
                 } catch (e) {
                   if (mounted) {

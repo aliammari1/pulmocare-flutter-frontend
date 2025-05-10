@@ -3,6 +3,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'dart:async';
 import '../services/ai_service.dart';
+import 'package:go_router/go_router.dart';
 
 class VoiceDictationScreen extends StatefulWidget {
   final String initialText;
@@ -415,7 +416,7 @@ class _VoiceDictationScreenState extends State<VoiceDictationScreen>
             icon: const Icon(Icons.check),
             tooltip: 'Accept and return',
             onPressed: () {
-              Navigator.pop(context, _textController.text);
+              context.pop(_textController.text);
             },
           ),
         ],
@@ -506,7 +507,7 @@ class _VoiceDictationScreenState extends State<VoiceDictationScreen>
             ),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pop(context, _textController.text);
+                context.pop(_textController.text);
               },
               icon: const Icon(Icons.save),
               label: const Text('Save'),

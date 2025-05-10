@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:intl/intl.dart';
 import '../services/ordonnance_viewmodel.dart';
+import 'package:go_router/go_router.dart';
 
 class PdfActionsScreen extends StatefulWidget {
   const PdfActionsScreen({super.key});
@@ -62,14 +63,14 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushReplacementNamed(context, '/');
+        context.pushReplacementNamed('/');
         return false;
       },
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () => Navigator.pushReplacementNamed(context, '/'),
+            onPressed: () => context.pushReplacementNamed('/'),
           ),
           title: const Text('Gestion des PDFs'),
           elevation: 0,
@@ -312,7 +313,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: isLoading ? null : () => Navigator.pop(context),
+              onPressed: isLoading ? null : () => context.pop(),
               child: const Text('Annuler'),
             ),
             ElevatedButton.icon(
@@ -338,7 +339,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
                       }
 
                       setState(() => isLoading = true);
-                      Navigator.pop(context);
+                      context.pop();
                       await _sendOrdonnanceToPacient(
                         context,
                         viewModel,
@@ -375,7 +376,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
             email, pdfBytes, ordonnance['patient_id']);
 
         if (context.mounted) {
-          Navigator.pop(context); // Fermer l'indicateur de chargement
+          context.pop(); // Fermer l'indicateur de chargement
           _showSuccessDialog(context, 'Email envoyé avec succès à $email');
         }
       } else {
@@ -383,7 +384,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context); // Fermer l'indicateur de chargement
+        context.pop(); // Fermer l'indicateur de chargement
         _showErrorDialog(context, 'Erreur lors de l\'envoi: $e');
       }
     }
@@ -496,7 +497,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
             child: const Text('Annuler'),
           ),
           ElevatedButton.icon(
@@ -510,7 +511,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
                 return;
               }
 
-              Navigator.pop(context);
+              context.pop();
               await _sendEmailToPacient(context, viewModel);
             },
           ),
@@ -553,7 +554,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
             child: const Text('OK'),
           ),
         ],
@@ -575,7 +576,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
             child: const Text('OK'),
           ),
         ],
@@ -626,7 +627,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
                     trailing: IconButton(
                       icon: const Icon(Icons.visibility),
                       onPressed: () {
-                        Navigator.pop(context);
+                        context.pop();
                         _previewPdf(context, viewModel, ord);
                       },
                     ),
@@ -638,7 +639,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
             child: const Text('Fermer'),
           ),
         ],
@@ -674,7 +675,7 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
 
       // Fermer l'indicateur de chargement
       if (context.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       if (pdfBytes != null && context.mounted) {
@@ -688,8 +689,8 @@ class _PdfActionsScreenState extends State<PdfActionsScreen> {
       }
     } catch (e) {
       // Fermer l'indicateur de chargement si toujours affiché
-      if (context.mounted && Navigator.canPop(context)) {
-        Navigator.pop(context);
+      if (context.mounted && context.canPop()) {
+        context.pop();
       }
 
       if (context.mounted) {

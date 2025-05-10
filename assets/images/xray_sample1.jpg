@@ -1,0 +1,1 @@
+<?xml version='1.0' encoding='UTF-8'?><Error><Code>MissingSecurityHeader</Code><Message>Invalid argument.</Message><Details>Your request was missing a required header. Missing headers: x-goog-credential</Details></Error>

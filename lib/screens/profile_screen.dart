@@ -4,6 +4,7 @@ import 'package:medapp/config.dart';
 import 'package:medapp/utils/DioClient.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -57,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.clear();
-              Navigator.pushReplacementNamed(context, '/');
+              context.go('/');
             },
           ),
         ],

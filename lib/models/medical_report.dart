@@ -1,53 +1,36 @@
-import 'package:hive/hive.dart';
-
 class MedicalReport {
   final String id;
 
   final String patientName;
 
-  @HiveField(2)
   final DateTime date;
 
-  @HiveField(3)
   final String diagnosis;
 
-  @HiveField(4)
   final String symptoms;
 
-  @HiveField(5)
   final String prescription;
 
-  @HiveField(6)
   final List<String> attachments;
 
-  @HiveField(7)
   final String doctorNotes;
 
-  @HiveField(8)
   final bool isHandwritten;
 
-  @HiveField(9)
   final bool isDictated;
 
-  @HiveField(10)
   final String patientId;
 
-  @HiveField(11)
   final Map<String, String> vitalSigns;
 
-  @HiveField(12)
   final bool isUrgent;
 
-  @HiveField(13)
   final String doctorId;
 
-  @HiveField(14)
   final DateTime createdAt;
 
-  @HiveField(15)
   final DateTime? lastModified;
 
-  @HiveField(16)
   final String status; // 'draft', 'pending', 'completed'
 
   MedicalReport({

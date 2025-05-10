@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:medapp/theme/app_theme.dart';
-import 'package:medapp/screens/forgot_password_view.dart';
+import 'package:go_router/go_router.dart';
+import 'package:medapp/models/user.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_view_model.dart';
-import 'signup_view.dart';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 class LoginView extends StatefulWidget {
-  final String userType;
+  final UserRole role;
 
-  const LoginView({super.key, required this.userType});
+  const LoginView({super.key, required this.role});
 
   @override
   _LoginViewState createState() => _LoginViewState();
@@ -34,8 +33,21 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _emailController.text = "ali.ammari@esprit.tn";
-    _passwordController.text = "password";
+    switch (widget.role) {
+      case UserRole.doctor:
+        _emailController.text = "ali.ammari@esprit.tn";
+        break;
+      case UserRole.radiologist:
+        _emailController.text = "ali.ammari2@esprit.tn";
+        break;
+      case UserRole.patient:
+        _emailController.text = "ali.ammari3@esprit.tn";
+        break;
+      default:
+        _emailController.text = "";
+        break;
+    }
+    _passwordController.text = "\$Admin2002";
     _backgroundAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 30),
@@ -96,7 +108,7 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
         content: Text(message, style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFF4FC3F7),
             ),
@@ -183,7 +195,7 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                         Align(
                           alignment: Alignment.topLeft,
                           child: _buildGlassButton(
-                            onTap: () => Navigator.pop(context),
+                            onTap: () => context.pop(),
                             child: Icon(
                               Icons.arrow_back_ios_new,
                               color: Colors.white.withOpacity(0.9),
@@ -295,7 +307,7 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                                     ),
                                   ),
                                   child: Text(
-                                    'Sign in as ${widget.userType}',
+                                    'Sign in as ${widget.role.name}',
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.9),
                                       fontSize: 14,
@@ -348,12 +360,8 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: TextButton(
-                                    onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const ForgotPasswordView()),
-                                    ),
+                                    onPressed: () =>
+                                        context.push('/forgot-password'),
                                     style: TextButton.styleFrom(
                                       foregroundColor: const Color(0xFF4FC3F7),
                                     ),
@@ -387,14 +395,61 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                                                   .login(
                                                     _emailController.text,
                                                     _passwordController.text,
+                                                    widget.role,
                                                   );
-                                              if (context
-                                                  .read<AuthViewModel>()
-                                                  .isAuthenticated) {
+
+                                              final authVM =
+                                                  context.read<AuthViewModel>();
+                                              if (authVM.isAuthenticated) {
+                                                // Check if returned role matches the selected role
+                                                String selectedRole = widget
+                                                    .role
+                                                    .toString()
+                                                    .split('.')
+                                                    .last
+                                                    .toLowerCase();
+                                                if (authVM.role !=
+                                                    selectedRole) {
+                                                  setState(
+                                                      () => _isLoading = false);
+                                                  _showAlert(
+                                                      'Error',
+                                                      'Wrong Username or Password',
+                                                      false);
+                                                  await context
+                                                      .read<AuthViewModel>()
+                                                      .logout(context);
+                                                  return;
+                                                }
+
                                                 _showAlert('Success',
                                                     'Login successful!', true);
-                                                Navigator.pushReplacementNamed(
-                                                    context, '/home');
+
+                                                // Add debug prints to track navigation
+                                                debugPrint(
+                                                    'DEBUG: Authentication successful. User type: ${authVM.role}');
+
+                                                // Redirect based on user type
+                                                if (authVM.role == 'doctor') {
+                                                  debugPrint(
+                                                      'DEBUG: Navigating doctor to /doctor-dashboard');
+                                                  context
+                                                      .go('/doctor-dashboard');
+                                                } else if (authVM.role ==
+                                                    'radiologist') {
+                                                  debugPrint(
+                                                      'DEBUG: Navigating radiologist to /radiologist-dashboard');
+                                                  context.go(
+                                                      '/radiologist-dashboard');
+                                                } else {
+                                                  debugPrint(
+                                                      'DEBUG: Navigating patient to /patient-dashboard');
+                                                  context.go(
+                                                      '/patient-dashboard'); // Patient dashboard
+                                                }
+                                              } else {
+                                                _showAlert('Error',
+                                                    authVM.errorMessage, false);
                                               }
                                             } catch (e) {
                                               _showAlert(
@@ -431,11 +486,8 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                             );
                           },
                           child: GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SignupView()),
-                            ),
+                            onTap: () =>
+                                context.push('/register', extra: widget.role),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 12, horizontal: 24),
@@ -773,9 +825,9 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                 ),
                 child: Center(
                   child: Icon(
-                    widget.userType == 'doctor'
+                    widget.role == 'doctor'
                         ? Icons.medical_services
-                        : widget.userType == 'radiologist'
+                        : widget.role == 'radiologist'
                             ? Icons.biotech
                             : Icons.person,
                     size: 70,
@@ -871,10 +923,10 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
             boxShadow: [
               BoxShadow(
                 color: isFocused
-                    ? const Color(0xFF4FC3F7).withOpacity(0.25)
-                    : const Color(0xFF4FC3F7).withOpacity(0.1),
-                blurRadius: isFocused ? 12 : 6,
-                spreadRadius: isFocused ? 1 : -2,
+                    ? const Color(0xFF4FC3F7).withOpacity(0.3)
+                    : const Color(0xFF304FFE).withOpacity(0.1),
+                blurRadius: isFocused ? 15 : 6,
+                spreadRadius: isFocused ? 2 : -1,
               ),
             ],
           ),
@@ -889,29 +941,44 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                     end: Alignment.bottomRight,
                     colors: isFocused
                         ? [
-                            Colors.white.withOpacity(0.12),
-                            Colors.white.withOpacity(0.05),
+                            Colors.white.withOpacity(0.15),
+                            Colors.white.withOpacity(0.07),
                           ]
                         : [
-                            Colors.white.withOpacity(0.08),
-                            Colors.white.withOpacity(0.02),
+                            Colors.white.withOpacity(0.09),
+                            Colors.white.withOpacity(0.03),
                           ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isFocused
-                        ? const Color(0xFF4FC3F7).withOpacity(0.6)
-                        : Colors.white.withOpacity(0.15),
-                    width: isFocused ? 1.5 : 1,
+                        ? const Color(0xFF4FC3F7).withOpacity(0.7)
+                        : Colors.white.withOpacity(0.2),
+                    width: isFocused ? 2 : 1,
                   ),
                 ),
+                child: isFocused
+                    ? Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF4FC3F7).withOpacity(0.1),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                      )
+                    : null,
               ),
 
               // Glassmorphism effect
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
@@ -923,19 +990,19 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                       focusNode: focusNode,
                       keyboardType: keyboardType,
                       obscureText: obscureText,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 15,
                         letterSpacing: 0.5,
+                        fontWeight: FontWeight.w500,
                       ),
                       cursorColor: const Color(0xFF4FC3F7),
                       cursorWidth: 1.5,
-                      cursorRadius: const Radius.circular(2),
+                      cursorRadius: const Radius.circular(3),
                       decoration: InputDecoration(
                         fillColor: Colors.transparent,
                         filled: true,
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 18),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 18),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -945,12 +1012,13 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                         floatingLabelBehavior: FloatingLabelBehavior.never,
                         hintText: isFocused ? labelText : null,
                         hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
+                          color: Colors.white.withOpacity(0.5),
                           fontSize: 15,
                           letterSpacing: 0.5,
+                          fontWeight: FontWeight.w400,
                         ),
                         labelStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withOpacity(0.7),
                           fontSize: 15,
                           letterSpacing: 0.5,
                         ),
@@ -960,26 +1028,26 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                           fontWeight: FontWeight.w500,
                         ),
                         prefixIcon: Container(
-                          margin: const EdgeInsets.only(right: 8),
+                          margin: const EdgeInsets.only(right: 12),
                           width: 56,
                           decoration: BoxDecoration(
                             border: Border(
                               right: BorderSide(
                                 color: isFocused
-                                    ? const Color(0xFF4FC3F7).withOpacity(0.3)
-                                    : Colors.white.withOpacity(0.1),
-                                width: 1,
+                                    ? const Color(0xFF4FC3F7).withOpacity(0.4)
+                                    : Colors.white.withOpacity(0.15),
+                                width: isFocused ? 1.5 : 1,
                               ),
                             ),
                             gradient: LinearGradient(
                               colors: isFocused
                                   ? [
-                                      const Color(0xFF304FFE).withOpacity(0.2),
-                                      const Color(0xFF4FC3F7).withOpacity(0.1),
+                                      const Color(0xFF304FFE).withOpacity(0.25),
+                                      const Color(0xFF4FC3F7).withOpacity(0.15),
                                     ]
                                   : [
-                                      Colors.transparent,
-                                      Colors.transparent,
+                                      Colors.white.withOpacity(0.05),
+                                      Colors.white.withOpacity(0.01),
                                     ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -989,8 +1057,8 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                             prefixIcon,
                             color: isFocused
                                 ? const Color(0xFF4FC3F7)
-                                : Colors.white.withOpacity(0.7),
-                            size: 20,
+                                : Colors.white.withOpacity(0.8),
+                            size: 22,
                           ),
                         ),
                         suffixIcon: suffixIcon,
@@ -1004,7 +1072,7 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
               if (isFocused)
                 Positioned.fill(
                   child: IgnorePointer(
-                    child: FocusParticles(),
+                    child: FocusParticles(color: const Color(0xFF4FC3F7)),
                   ),
                 ),
             ],
@@ -1017,6 +1085,10 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
 
 // Add a new widget for focus particles
 class FocusParticles extends StatefulWidget {
+  final Color color;
+
+  const FocusParticles({super.key, required this.color});
+
   @override
   _FocusParticlesState createState() => _FocusParticlesState();
 }
@@ -1050,6 +1122,7 @@ class _FocusParticlesState extends State<FocusParticles>
           return CustomPaint(
             painter: FieldParticlesPainter(
               animationValue: _controller.value,
+              color: widget.color,
             ),
             size: Size.infinite,
           );
@@ -1061,8 +1134,9 @@ class _FocusParticlesState extends State<FocusParticles>
 
 class FieldParticlesPainter extends CustomPainter {
   final double animationValue;
+  final Color color;
 
-  FieldParticlesPainter({required this.animationValue});
+  FieldParticlesPainter({required this.animationValue, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1085,7 +1159,7 @@ class FieldParticlesPainter extends CustomPainter {
 
       final paint = Paint()
         ..color = i % 2 == 0
-            ? const Color(0xFF4FC3F7).withOpacity(opacity * 0.5)
+            ? color.withOpacity(opacity * 0.5)
             : Colors.white.withOpacity(opacity * 0.3);
 
       canvas.drawCircle(Offset(x, y), radius, paint);
@@ -1094,7 +1168,8 @@ class FieldParticlesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(FieldParticlesPainter oldDelegate) =>
-      oldDelegate.animationValue != animationValue;
+      oldDelegate.animationValue != animationValue ||
+      oldDelegate.color != color;
 }
 
 // Custom painter for creating the animated gradient background

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
+import 'package:go_router/go_router.dart';
 
 import 'package:medapp/config.dart';
 import 'package:medapp/utils/DioClient.dart';
@@ -51,7 +52,7 @@ class _VisitCardScanDialogState extends State<VisitCardScanDialog> {
 
       if (response.statusCode == 200) {
         var data = response.data;
-        Navigator.pop(context, data); // Return the extracted data
+        context.pop(data); // Return the extracted data
       } else {
         setState(() => _errorMessage = 'Failed to process image');
       }

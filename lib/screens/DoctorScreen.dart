@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:medapp/models/doctor.dart';
 import 'package:medapp/services/doctor_service.dart';
 
 // Constantes de couleurs pour le thème médical moderne
@@ -10,7 +12,9 @@ const Color textSecondaryColor = Color(0xFF7F8C8D); // Gris moyen
 const Color cardColor = Colors.white;
 
 class DoctorScreen extends StatefulWidget {
-  const DoctorScreen({super.key});
+  final String? patientId;
+
+  const DoctorScreen({super.key, this.patientId});
 
   @override
   _DoctorScreenState createState() => _DoctorScreenState();
@@ -18,9 +22,9 @@ class DoctorScreen extends StatefulWidget {
 
 class _DoctorScreenState extends State<DoctorScreen> {
   final DoctorService _doctorService = DoctorService();
-  late Future<List<Map<String, dynamic>>> _doctorsFuture;
-  List<Map<String, dynamic>> _allDoctors = [];
-  List<Map<String, dynamic>> _filteredDoctors = [];
+  late Future<List<Doctor>> _doctorsFuture;
+  List<Doctor> _allDoctors = [];
+  List<Doctor> _filteredDoctors = [];
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
   bool _hasError = false;
@@ -44,7 +48,8 @@ class _DoctorScreenState extends State<DoctorScreen> {
     });
 
     try {
-      _doctorsFuture = _doctorService.getDoctors();
+      _doctorsFuture =
+          _doctorService.getDoctors().then((doctors) => doctors.items);
       final doctors = await _doctorsFuture;
 
       setState(() {
@@ -71,8 +76,8 @@ class _DoctorScreenState extends State<DoctorScreen> {
     final lowercaseQuery = query.toLowerCase();
     setState(() {
       _filteredDoctors = _allDoctors.where((doctor) {
-        final doctorName = doctor["name"].toString().toLowerCase();
-        final doctorSpecialty = doctor["specialty"].toString().toLowerCase();
+        final doctorName = (doctor.name ?? "").toLowerCase();
+        final doctorSpecialty = doctor.specialty.toLowerCase();
         return doctorName.contains(lowercaseQuery) ||
             doctorSpecialty.contains(lowercaseQuery);
       }).toList();
@@ -95,7 +100,7 @@ class _DoctorScreenState extends State<DoctorScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2C3E50)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       body: Column(
@@ -283,11 +288,11 @@ class _DoctorScreenState extends State<DoctorScreen> {
                           color: primaryColor.withAlpha((0.1 * 255).toInt()),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: doctor["profile_image"] != null
+                        child: doctor.profilePicture != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.network(
-                                  doctor["profile_image"],
+                                  doctor.profilePicture!,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
@@ -312,7 +317,9 @@ class _DoctorScreenState extends State<DoctorScreen> {
                             Row(
                               children: [
                                 Text(
-                                  doctor["name"] ?? "Nom non disponible",
+                                  (doctor.name == null || doctor.name!.isEmpty)
+                                      ? "Nom non disponible"
+                                      : doctor.name!,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: textPrimaryColor,
@@ -320,7 +327,7 @@ class _DoctorScreenState extends State<DoctorScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 8),
-                                if (doctor["is_verified"] == true)
+                                if (doctor.isVerified == true)
                                   Icon(
                                     Icons.verified,
                                     color: Colors.blue,
@@ -330,21 +337,21 @@ class _DoctorScreenState extends State<DoctorScreen> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              "Spécialité: ${doctor["specialty"] ?? "Non spécifiée"}",
+                              "Spécialité: ${doctor.specialty.isEmpty ? 'Non spécifiée' : doctor.specialty}",
                               style: TextStyle(
                                 color: textSecondaryColor,
                                 fontSize: 14,
                               ),
                             ),
                             Text(
-                              "Adresse: ${doctor["address"] ?? "Non spécifiée"}",
+                              "Adresse: ${doctor.address ?? "Non spécifiée"}",
                               style: TextStyle(
                                 color: textSecondaryColor,
                                 fontSize: 14,
                               ),
                             ),
                             Text(
-                              "Téléphone: ${doctor["phone_number"] ?? "Non spécifié"}",
+                              "Téléphone: ${doctor.phone ?? "Non spécifié"}",
                               style: TextStyle(
                                 color: textSecondaryColor,
                                 fontSize: 14,
@@ -368,7 +375,7 @@ class _DoctorScreenState extends State<DoctorScreen> {
     );
   }
 
-  void _showDetailsDialog(BuildContext context, Map<String, dynamic> doctor) {
+  void _showDetailsDialog(BuildContext context, Doctor doctor) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -379,14 +386,14 @@ class _DoctorScreenState extends State<DoctorScreen> {
           title: Row(
             children: [
               Text(
-                "Dr. ${doctor["name"]}",
+                "Dr. ${doctor.name != null && doctor.name!.isNotEmpty ? doctor.name : 'Unknown'}",
                 style: TextStyle(
                   color: textPrimaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(width: 8),
-              if (doctor["is_verified"] == true)
+              if (doctor.isVerified == true)
                 Icon(
                   Icons.verified,
                   color: Colors.blue,
@@ -400,18 +407,31 @@ class _DoctorScreenState extends State<DoctorScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildDetailItem(
-                    "Spécialité", doctor["specialty"] ?? "Non spécifiée"),
+                    "Spécialité",
+                    doctor.specialty.isEmpty
+                        ? "Non spécifiée"
+                        : doctor.specialty),
                 _buildDetailItem(
-                    "Adresse", doctor["address"] ?? "Non spécifiée"),
+                    "Adresse",
+                    doctor.address == null || doctor.address!.isEmpty
+                        ? "Non spécifiée"
+                        : doctor.address!),
                 _buildDetailItem(
-                    "Téléphone", doctor["phone_number"] ?? "Non spécifié"),
-                _buildDetailItem("Email", doctor["email"] ?? "Non spécifié"),
-                if (doctor["profile_image"] != null) ...[
+                    "Téléphone",
+                    doctor.phone == null || doctor.phone!.isEmpty
+                        ? "Non spécifié"
+                        : doctor.phone!),
+                _buildDetailItem(
+                    "Email",
+                    doctor.email == null || doctor.email!.isEmpty
+                        ? "Non spécifié"
+                        : doctor.email!),
+                if (doctor.profilePicture != null) ...[
                   SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      doctor["profile_image"],
+                      doctor.profilePicture!,
                       height: 200,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -435,7 +455,7 @@ class _DoctorScreenState extends State<DoctorScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                context.pop();
               },
               child: Text(
                 "Fermer",

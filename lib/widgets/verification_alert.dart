@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_view_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
+import 'package:go_router/go_router.dart';
 
 class VerificationAlert extends StatelessWidget {
   final bool isVerified;
@@ -88,7 +89,7 @@ class VerificationAlert extends StatelessWidget {
           ElevatedButton(
             onPressed: () => _handleVerification(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.turquoise,
+              backgroundColor: AppTheme.primaryColor,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
@@ -116,14 +117,14 @@ class VerificationAlert extends StatelessWidget {
           context: context,
           barrierDismissible: false,
           builder: (ctx) => const Center(
-            child: CircularProgressIndicator(color: AppTheme.turquoise),
+            child: CircularProgressIndicator(color: AppTheme.primaryColor),
           ),
         );
 
         await context.read<AuthViewModel>().verifyDoctor(base64Image);
 
         // Close loading dialog
-        Navigator.pop(context);
+        context.pop();
 
         // Show success/error message
         final error = context.read<AuthViewModel>().errorMessage;
@@ -138,7 +139,7 @@ class VerificationAlert extends StatelessWidget {
           ),
         );
       } catch (e) {
-        Navigator.pop(context); // Close loading dialog
+        context.pop(); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),

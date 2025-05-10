@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// Import RapportScreen
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -35,7 +35,8 @@ class HomeScreen extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   height: 140,
-                  padding: EdgeInsets.only(left: 25, bottom: 15, top: 15, right: 30),
+                  padding:
+                      EdgeInsets.only(left: 25, bottom: 15, top: 15, right: 30),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.lightBlue, width: 2.5),
                     color: Colors.white,
@@ -68,16 +69,17 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                       const Spacer(),
-                      Image.asset('assets/reportage.png',
-                          fit: BoxFit.cover,
-                         ),
+                      Image.asset(
+                        'assets/reportage.png',
+                        fit: BoxFit.cover,
+                      ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 20),
 
-              //SCREENS 
+              //SCREENS
               Padding(
                   padding: EdgeInsets.only(left: 15),
                   child: Text(
@@ -98,7 +100,7 @@ class HomeScreen extends StatelessWidget {
                     Expanded(
                         child: GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/doctor');
+                        context.pushNamed('/doctor');
                       },
                       child: Container(
                         padding: const EdgeInsets.all(15),
@@ -151,7 +153,7 @@ class HomeScreen extends StatelessWidget {
                     Expanded(
                         child: GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/doctor_med');
+                        context.pushNamed('/doctor_med');
                       },
                       child: Container(
                         padding: const EdgeInsets.all(15),
@@ -260,8 +262,7 @@ class HomeScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                    )
-                    ),
+                    )),
                     const SizedBox(width: 15),
                     //Box News
                     Expanded(
@@ -285,10 +286,11 @@ class HomeScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.asset('assets/docteur.png',
-                                 width: 90,
-                                 height: 90,
-                                ),
+                            Image.asset(
+                              'assets/docteur.png',
+                              width: 90,
+                              height: 90,
+                            ),
                             const SizedBox(height: 15),
                             const Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -313,8 +315,7 @@ class HomeScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                    )
-                  ),
+                    )),
                   ],
                 ),
               ),

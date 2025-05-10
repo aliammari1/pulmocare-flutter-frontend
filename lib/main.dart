@@ -1,40 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:medapp/screens/ReportHomeScreen.dart';
-import 'package:medapp/screens/Signup_screen.dart';
-import 'package:medapp/services/auth_radio_view_model.dart';
-import 'package:medapp/services/auth_view_model_patient.dart';
-import 'package:medapp/screens/patients_view.dart';
+import 'package:medapp/navigation/app_router.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
-import 'screens/create_report_screen.dart';
 import 'services/service_locator.dart';
 import 'services/report_service.dart';
 import 'providers/report_provider.dart';
-import 'screens/reports/reports_list_screen.dart';
 import 'services/auth_view_model.dart';
 import 'services/chat_viewmodel.dart';
-import 'screens/login_view.dart';
-import 'screens/home_view_radio.dart';
-import 'screens/home_view.dart';
-import 'screens/entry_view.dart';
-import 'screens/splash_screen.dart';
-import 'screens/login_radio.dart';
-import 'screens/login_screen.dart';
 import 'theme/app_theme.dart';
-import 'package:medapp/screens/AppointmentsScreen.dart';
-import 'package:medapp/screens/ArchiveScreen.dart';
-import 'package:medapp/screens/RapportScreen.dart';
-import 'package:medapp/screens/profile_radio.dart';
-import 'package:medapp/screens/signup_view.dart';
-import 'package:medapp/screens/signup_radio.dart';
 import 'package:medapp/services/notification_provider.dart';
+import 'package:flutter/services.dart';
+import 'providers/user_provider.dart';
 
 void main() async {
   await runZonedGuarded(() async {
+    debugPrint('DEBUG: Starting app initialization');
     WidgetsFlutterBinding.ensureInitialized();
+    debugPrint('DEBUG: Flutter binding initialized');
+
+    // Set preferred orientations
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    // Set status bar style
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: AppTheme.surfaceColor,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
 
     // Setup service locator
     await setupServiceLocator();
+    debugPrint('DEBUG: Service locator setup complete');
 
     runApp(
       MultiProvider(
@@ -44,16 +44,16 @@ void main() async {
           ChangeNotifierProvider(
             create: (_) => ReportProvider(getIt<ReportService>()),
           ),
-          ChangeNotifierProvider(create: (_) => AuthRadioViewModel()),
-          ChangeNotifierProvider(create: (_) => PatientAuthViewModel()),
-          ChangeNotifierProvider(create: (_) => NotificationProvider())
+          ChangeNotifierProvider(create: (_) => NotificationProvider()),
+          ChangeNotifierProvider(create: (_) => UserProvider()),
         ],
         child: const MedicalApp(),
       ),
     );
+    debugPrint('DEBUG: App started with providers');
   }, (error, stackTrace) {
     // Improved error handling
-    debugPrint('Error in main: $error');
+    debugPrint('ERROR in main: $error');
     debugPrint('Stack trace: $stackTrace');
   });
 }
@@ -66,92 +66,110 @@ class MedicalApp extends StatefulWidget {
 }
 
 class _MedicalAppState extends State<MedicalApp> {
-  // Preload the EntryView
-  final _entryViewKey = GlobalKey();
+  @override
+  void initState() {
+    super.initState();
+    // Initialize UserProvider data
+    Future.delayed(Duration.zero, () {
+      // Initialize UserProvider with data
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.initUserData();
+
+      // Sync with AuthViewModel if user is authenticated
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      if (authViewModel.isAuthenticated) {
+        authViewModel.syncWithUserProvider(userProvider);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Pre-build the EntryView to have it ready
-    final entryView = EntryView(key: _entryViewKey);
-
-    return MaterialApp(
-      title: 'Pulmocare',
+    return MaterialApp.router(
+      title: 'PulmoCare',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      darkTheme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: Brightness.dark,
-      ),
-      themeMode: ThemeMode.system,
-      home: const SplashScreen(),
-      routes: {
-        '/home': (context) => const HomeView(),
-        '/homeRadio': (context) => const HomeViewRadio(),
-        '/dashboard': (context) => const HomeScreen(),
-        '/login': (context) => const LoginView(userType: 'default'),
-        '/loginRadio': (context) => const LoginRadioView(),
-        '/loginScreen': (context) => const LoginScreen(),
-        '/signupView': (context) => const SignupView(),
-        '/signupRadio': (context) => const SignupRadioView(),
-        '/archiveScreen': (context) => ArchiveScreen(),
-        '/rapportScreen': (context) => RapportScreen(),
-        '/appointmentsScreen': (context) => const AppointmentsScreen(),
-        '/profileRadio': (context) => const ProfileRadioView(),
-        '/createReport': (context) => const CreateReportScreen(),
-        '/reportsList': (context) => const ReportsListScreen(),
-        "/add-patient": (context) => const PatientSignupView(),
-        "/patients_doctor": (context) => const PatientsView(),
-        '/entryView': (context) => entryView, // Use the pre-built instance
-      },
+      darkTheme:
+          AppTheme.lightTheme, // Using light theme for now for consistency
+      themeMode:
+          ThemeMode.light, // Forcing light mode for medical app reliability
+      routerConfig: AppRouter.router,
       builder: (context, child) {
-        // ErrorWidget customization to prevent red screen flashes
-        ErrorWidget.builder = (FlutterErrorDetails details) {
-          // If in debug mode, show development error screen with reduced flashiness
-          if (context != null) {
-            return Container(
-              color: Colors.transparent,
-              child: Center(
-                child: Opacity(
-                  opacity: 0.8,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    margin: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF050A30),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: Colors.blue.withOpacity(0.7), width: 1),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.warning_amber_rounded,
-                            color: Colors.amber, size: 32),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'App is loading...',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                        if (false) // Only in extreme debug cases
-                          Text(
-                            details.exception.toString(),
-                            style: const TextStyle(
-                                color: Colors.white70, fontSize: 12),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }
-          return Container(color: Colors.transparent);
-        };
-
-        return child!;
+        // Apply text scaling
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: _ErrorHandlingWrapper(child: child!),
+        );
       },
     );
+  }
+}
+
+class _ErrorHandlingWrapper extends StatelessWidget {
+  final Widget child;
+
+  const _ErrorHandlingWrapper({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    // ErrorWidget customization for a cleaner error experience
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+      return Container(
+        color: AppTheme.surfaceColor,
+        child: Center(
+          child: Opacity(
+            opacity: 0.9,
+            child: Container(
+              padding: const EdgeInsets.all(AppTheme.spacingLarge),
+              margin: const EdgeInsets.all(AppTheme.spacingLarge),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
+                boxShadow: AppTheme.elevationMedium,
+                border: Border.all(
+                  color: AppTheme.primaryColor.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.medical_services_outlined,
+                    color: AppTheme.primaryColor,
+                    size: 48,
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
+                  Text(
+                    'Preparing Medical Data',
+                    style: TextStyle(
+                      color: AppTheme.textPrimaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppTheme.fontSizeXLarge,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingSmall),
+                  Text(
+                    'Please wait while we load your medical information...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppTheme.textSecondaryColor,
+                      fontSize: AppTheme.fontSizeMedium,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingLarge),
+                  CircularProgressIndicator(
+                    color: AppTheme.secondaryColor,
+                    strokeWidth: 3,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    };
+
+    return child;
   }
 }

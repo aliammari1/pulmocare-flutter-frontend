@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_view_model.dart';
 import '../theme/app_theme.dart';
+import 'package:go_router/go_router.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});
@@ -68,7 +69,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
             child: Text('OK'),
           ),
         ],
@@ -106,7 +107,8 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD8EFF5).withAlpha((0.3 * 255).toInt()),
+                        color: const Color(0xFFD8EFF5)
+                            .withAlpha((0.3 * 255).toInt()),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -153,10 +155,9 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                             TextFormField(
                               controller: _emailController,
                               validator: _validateEmail,
-                              decoration: AppTheme.inputDecoration.copyWith(
+                              decoration: AppTheme.inputDecoration(
                                 labelText: 'Email',
-                                prefixIcon:
-                                    Icon(Icons.email, color: Color(0xFF81C9F3)),
+                                prefixIcon: Icons.email,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -204,10 +205,9 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                               validator: _validateOTP,
                               keyboardType: TextInputType.number,
                               maxLength: 6,
-                              decoration: AppTheme.inputDecoration.copyWith(
+                              decoration: AppTheme.inputDecoration(
                                 labelText: 'Enter OTP',
-                                prefixIcon:
-                                    Icon(Icons.pin, color: Color(0xFF81C9F3)),
+                                prefixIcon: Icons.pin,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -263,10 +263,9 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                               controller: _newPasswordController,
                               validator: _validatePassword,
                               obscureText: true,
-                              decoration: AppTheme.inputDecoration.copyWith(
+                              decoration: AppTheme.inputDecoration(
                                 labelText: 'New Password',
-                                prefixIcon:
-                                    Icon(Icons.lock, color: Color(0xFF81C9F3)),
+                                prefixIcon: Icons.lock,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -290,8 +289,8 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                                                 'Password reset successful',
                                                 true);
                                             // Navigate to login page after successful reset
-                                            Navigator.pushReplacementNamed(
-                                                context, '/login');
+                                            context
+                                                .pushReplacementNamed('/login');
                                           } else {
                                             _showAlert(
                                                 'Error',
@@ -332,7 +331,8 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                                 margin: const EdgeInsets.only(top: 16),
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withAlpha((0.1 * 255).toInt()),
+                                  color:
+                                      Colors.red.withAlpha((0.1 * 255).toInt()),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(

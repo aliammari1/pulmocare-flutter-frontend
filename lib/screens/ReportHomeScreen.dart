@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:medapp/screens/Signup_screen.dart';
 import 'package:medapp/screens/create_report_screen.dart';
 import 'package:medapp/screens/handwriting_screen.dart';
 import 'package:medapp/screens/report_editor_screen.dart';
 import 'package:medapp/screens/reports/reports_list_screen.dart';
-import 'package:medapp/services/auth_radio_view_model.dart';
-import 'package:medapp/services/auth_view_model_patient.dart';
-import 'package:medapp/screens/patients_view.dart';
 import 'package:medapp/services/report_service.dart';
 import 'package:medapp/widgets/app_drawer.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
-import 'package:medapp/screens/AppointmentsScreen.dart';
-import 'package:medapp/screens/ArchiveScreen.dart';
-import 'package:medapp/screens/RapportScreen.dart';
-import 'package:medapp/screens/profile_radio.dart';
-import 'package:medapp/screens/signup_view.dart';
-import 'package:medapp/screens/signup_radio.dart';
-import 'package:medapp/services/notification_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -106,27 +95,26 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToCreateReport(BuildContext context) {
     final reportService = Provider.of<ReportService>(context, listen: false);
 
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            Provider<ReportService>.value(
-          value: reportService,
-          child: const CreateReportScreen(),
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(0.0, 1.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOutCubic;
-          var tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        },
-      ),
-    );
+    // context.push(
+    //   PageRouteBuilder(
+    //     pageBuilder: (context, animation, secondaryAnimation) =>
+    //         Provider<ReportService>.value(
+    //       value: reportService,
+    //       child: const CreateReportScreen(),
+    //     ),
+    //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    //       const begin = Offset(0.0, 1.0);
+    //       const end = Offset.zero;
+    //       const curve = Curves.easeInOutCubic;
+    //       var tween =
+    //           Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+    //       return SlideTransition(
+    //         position: animation.drive(tween),
+    //         child: child,
+    //       );
+    //     },
+    //   ),
+    // );
   }
 }
 
@@ -252,21 +240,20 @@ class DashboardTab extends StatelessWidget {
         childAspectRatio: 1.1,
       ),
       children: [
-        _buildFeatureCard(
-          context,
-          'Create Report',
-          'Start a new medical report',
-          Icons.note_add,
-          const Color(0xFFF0F7FA),
-          () {
-            final navigator = Navigator.of(context);
-            navigator.push(
-              MaterialPageRoute(
-                builder: (context) => const CreateReportScreen(),
-              ),
-            );
-          },
-        ),
+        // _buildFeatureCard(
+        //   context,
+        //   'Create Report',
+        //   'Start a new medical report',
+        //   Icons.note_add,
+        //   const Color(0xFFF0F7FA),
+        //   () {
+        //     context.push(
+        //       MaterialPageRoute(
+        //         builder: (context) => const CreateReportScreen(),
+        //       ),
+        //     );
+        //   },
+        // ),
         _buildFeatureCard(
           context,
           'Smart Editor', // Updated name
@@ -274,29 +261,27 @@ class DashboardTab extends StatelessWidget {
           Icons.edit_note, // Updated icon
           const Color(0xFFF0FAF0),
           () {
-            final navigatorContext = context;
-            final navigator = Navigator.of(context);
-            navigator
-                .push(
-              MaterialPageRoute(
-                builder: (context) => const ReportEditorScreen(
-                  reportId: 'new',
-                  patientName: 'New Patient',
-                ),
-              ),
-            )
-                .then((value) {
-              if (value != null && navigatorContext.mounted) {
-                ScaffoldMessenger.of(navigatorContext).showSnackBar(
-                  SnackBar(
-                    content: const Text('Report saved as draft'),
-                    backgroundColor:
-                        Theme.of(navigatorContext).colorScheme.secondary,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            });
+            // context
+            //     .push(
+            //   MaterialPageRoute(
+            //     builder: (context) => const ReportEditorScreen(
+            //       reportId: 'new',
+            //       patientName: 'New Patient',
+            //     ),
+            //   ),
+            // )
+            //     .then((value) {
+            //   if (value != null && context.mounted) {
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       SnackBar(
+            //         content: const Text('Report saved as draft'),
+            //         backgroundColor:
+            //             Theme.of(navigatorContext).colorScheme.secondary,
+            //         behavior: SnackBarBehavior.floating,
+            //       ),
+            //     );
+            //   }
+            // });
           },
         ),
         _buildFeatureCard(
@@ -306,27 +291,25 @@ class DashboardTab extends StatelessWidget {
           Icons.draw,
           const Color(0xFFFFF8F0),
           () {
-            final navigatorContext = context;
-            final navigator = Navigator.of(context);
-            navigator
-                .push(
-              MaterialPageRoute(
-                builder: (context) => const HandwritingScreen(),
-              ),
-            )
-                .then((value) {
-              if (value != null && navigatorContext.mounted) {
-                ScaffoldMessenger.of(navigatorContext).showSnackBar(
-                  SnackBar(
-                    content: const Text(
-                        'Handwriting captured. Open Create Report to use it.'),
-                    backgroundColor:
-                        Theme.of(navigatorContext).colorScheme.secondary,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            });
+            // context
+            //     .push(
+            //   MaterialPageRoute(
+            //     builder: (context) => const HandwritingScreen(),
+            //   ),
+            // )
+            //     .then((value) {
+            //   if (value != null && context.mounted) {
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       SnackBar(
+            //         content: const Text(
+            //             'Handwriting captured. Open Create Report to use it.'),
+            //         backgroundColor:
+            //             Theme.of(navigatorContext).colorScheme.secondary,
+            //         behavior: SnackBarBehavior.floating,
+            //       ),
+            //     );
+            //   }
+            // });
           },
         ),
         _buildFeatureCard(
