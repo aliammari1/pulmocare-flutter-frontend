@@ -45,7 +45,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
     // Fix for Android 12L and above
     implementation("androidx.window:window:1.0.0")
-    implementation("androidx.window:window-java:1.0.0")
+    implementation("androidx.window:window-java:1.5.1")
 }
 
 flutter {
