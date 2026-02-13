@@ -29,7 +29,7 @@ dependencies:
   geocoding: ^2.1.0
   shimmer: ^3.0.0
   url_launcher: ^6.1.14
-  google_generative_ai: ^0.3.0
+  google_generative_ai: 0.4.7
   signature: ^5.4.0
   flutter_signature_pad: ^3.0.1
   cupertino_icons: ^1.0.8
