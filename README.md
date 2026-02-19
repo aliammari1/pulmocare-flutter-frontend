@@ -51,8 +51,8 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/aliammari1/medapp-frontend.git
-   cd medapp-frontend
+   git clone https://github.com/aliammari1/pulmocare-flutter-frontend.git
+   cd pulmocare-flutter-frontend
    ```
 
 2. **Install dependencies**
@@ -326,7 +326,7 @@ CMD ["nginx", "-g", "daemon off;"]
 ```yaml
 version: '3.8'
 services:
-  medapp-frontend:
+  pulmocare-flutter-frontend:
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -393,8 +393,8 @@ We welcome contributions from the community! Please follow these guidelines:
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/your-username/medapp-frontend.git
-   cd medapp-frontend
+   git clone https://github.com/aliammari1/pulmocare-flutter-frontend.git
+   cd pulmocare-flutter-frontend
    ```
 
 2. **Create a feature branch**
@@ -633,18 +633,14 @@ SOFTWARE.
 
 ## 🔗 Related Projects
 
-- [medapp](https://github.com/aliammari1/medapp) - Full-stack medical application
 - [medapp-backend](https://github.com/aliammari1/medapp-backend) - Backend API service
-- [medapp-backend-final-edition](https://github.com/aliammari1/medapp-backend-final-edition) - Production backend
-- [libraryapp-flutter-front](https://github.com/aliammari1/libraryapp-flutter-front) - Library management app
 
 ## 📞 Support & Contact
 
-- **Documentation**: [Project Wiki](https://github.com/aliammari1/medapp-frontend/wiki)
-- **Issues**: [GitHub Issues](https://github.com/aliammari1/medapp-frontend/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/aliammari1/medapp-frontend/discussions)
-- **Email Support**: [support@aliammari.com](mailto:support@aliammari.com)
-- **Medical Consultation**: [medical@aliammari.com](mailto:medical@aliammari.com)
+- **Documentation**: [Project Wiki](https://github.com/aliammari1/pulmocare-flutter-frontend/wiki)
+- **Issues**: [GitHub Issues](https://github.com/aliammari1/pulmocare-flutter-frontend/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/aliammari1/pulmocare-flutter-frontend/discussions)
+- **Email Support**: [contact@aliammari.com](mailto:contact@aliammari.com)
 
 ---
 
