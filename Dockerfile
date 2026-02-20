@@ -1,5 +1,5 @@
 # Use Flutter image as build environment
-FROM ghcr.io/cirruslabs/flutter:3.16.3 AS builder
+FROM ghcr.io/cirruslabs/flutter:3.41.2 AS builder
 
 # Set working directory
 WORKDIR /app
